@@ -2,6 +2,27 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 
+// 라벨 + 입력 한 행 컴포넌트
+const Row = ({ label, required, children }) => (
+    <div className="flex flex-col sm:flex-row sm:items-start py-2.5 border-b border-gray-100 last:border-0">
+        <div className="w-full sm:w-28 shrink-0 text-sm font-medium text-gray-600 py-1.5">
+            {required && <span className="text-red-500 mr-1">*</span>}
+            {label}
+        </div>
+        <div className="flex-1">{children}</div>
+    </div>
+)
+
+// 섹션 타이틀
+const SectionTitle = ({ title }) => (
+    <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-1 col-span-1 sm:col-span-2">
+        {title}
+    </h2>
+)
+
+// 공통 input 스타일
+const inputClass = "w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
+
 function AdminRegister() {
     const navigate = useNavigate()
 
@@ -57,41 +78,9 @@ function AdminRegister() {
         }
     }
 
-    // 라벨 + 입력 한 행 컴포넌트
-    const Row = ({ label, required, children }) => (
-        <div className="flex flex-col sm:flex-row sm:items-start border-b border-gray-100 py-3">
-            {/* 라벨 */}
-            <div className="w-full sm:w-36 shrink-0 text-sm font-medium text-gray-600 py-1.5">
-                {required && <span className="text-red-500 mr-1">*</span>}
-                {label}
-            </div>
-            {/* 입력 */}
-            <div className="flex-1">
-                {children}
-            </div>
-        </div>
-    )
-
-    // 입력 필드
-    const Input = ({ name, type = 'text', placeholder }) => (
-        <>
-            <input
-                type={type}
-                name={name}
-                placeholder={placeholder}
-                value={form[name]}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400"
-            />
-            {errors[name] && (
-                <p className="text-red-500 text-xs mt-1">{errors[name]}</p>
-            )}
-        </>
-    )
-
     return (
         <div className="min-h-screen bg-gray-100 py-8 px-4">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-5xl mx-auto">
 
                 {/* 헤더 */}
                 <div className="text-center mb-6">
@@ -99,122 +88,119 @@ function AdminRegister() {
                     <p className="text-sm text-gray-500 mt-1">가입 후 최고 관리자 승인이 필요합니다</p>
                 </div>
 
-                <div className="bg-white rounded-lg shadow">
+                <div className="bg-white rounded-lg shadow p-6">
 
                     {/* 일반 에러 */}
                     {errors.general && (
-                        <div className="bg-red-100 text-red-600 text-sm p-3 rounded mx-6 mt-6">
+                        <div className="bg-red-100 text-red-600 text-sm p-3 rounded mb-4">
                             {errors.general}
                         </div>
                     )}
 
-                    {/* 기본 정보 */}
-                    <div className="px-6 pt-6 pb-2">
-                        <h2 className="text-base font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-2">
-                            기본 정보
-                        </h2>
-                        <Row label="아이디" required>
-                            <Input name="admin_id" placeholder="아이디 (4자 이상)" />
-                        </Row>
-                        <Row label="비밀번호" required>
-                            <div className="flex flex-col gap-2">
-                                <Input name="password" type="password" placeholder="비밀번호 (6자 이상)" />
-                                <Input name="password_confirm" type="password" placeholder="비밀번호 확인" />
-                                {errors.password_confirm && (
-                                    <p className="text-red-500 text-xs">{errors.password_confirm}</p>
-                                )}
+                    {/* 2단 그리드 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+
+                        {/* ===== 기본 정보 ===== */}
+                        <SectionTitle title="기본 정보" />
+
+                        <div className="border border-gray-100 rounded p-3">
+                            <Row label="아이디" required>
+                                <input type="text" name="admin_id" placeholder="아이디 (4자 이상)" value={form.admin_id} onChange={handleChange} className={inputClass} />
+                                {errors.admin_id && <p className="text-red-500 text-xs mt-1">{errors.admin_id}</p>}
+                            </Row>
+                            <Row label="이름" required>
+                                <input type="text" name="name" placeholder="이름" value={form.name} onChange={handleChange} className={inputClass} />
+                                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                            </Row>
+                            <Row label="닉네임">
+                                <input type="text" name="nickname" placeholder="닉네임" value={form.nickname} onChange={handleChange} className={inputClass} />
+                            </Row>
+                        </div>
+
+                        {/* ===== 비밀번호 ===== */}
+                        <div className="border border-gray-100 rounded p-3">
+                            <Row label="비밀번호" required>
+                                <input type="password" name="password" placeholder="비밀번호 (6자 이상)" value={form.password} onChange={handleChange} className={inputClass} />
+                                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                            </Row>
+                            <Row label="비밀번호 확인" required>
+                                <input type="password" name="password_confirm" placeholder="비밀번호 확인" value={form.password_confirm} onChange={handleChange} className={inputClass} />
+                                {errors.password_confirm && <p className="text-red-500 text-xs mt-1">{errors.password_confirm}</p>}
+                            </Row>
+                        </div>
+
+                        {/* ===== 연락처 정보 ===== */}
+                        <SectionTitle title="연락처 정보" />
+
+                        <div className="border border-gray-100 rounded p-3">
+                            <Row label="휴대폰" required>
+                                <input type="text" name="mobile" placeholder="010-0000-0000" value={form.mobile} onChange={handleChange} className={inputClass} />
+                                {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
+                            </Row>
+                            <Row label="이메일" required>
+                                <input type="email" name="email" placeholder="이메일" value={form.email} onChange={handleChange} className={inputClass} />
+                                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+                            </Row>
+                        </div>
+
+                        <div className="border border-gray-100 rounded p-3">
+                            <Row label="전화번호">
+                                <div className="flex gap-2">
+                                    <input type="text" name="phone" placeholder="전화번호" value={form.phone} onChange={handleChange} className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400" />
+                                    <input type="text" name="phone_ext" placeholder="내선" value={form.phone_ext} onChange={handleChange} className="w-20 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400" />
+                                </div>
+                            </Row>
+                        </div>
+
+                        {/* ===== 직원 정보 ===== */}
+                        <SectionTitle title="직원 정보" />
+
+                        <div className="border border-gray-100 rounded p-3">
+                            <Row label="직원여부">
+                                <select name="emp_type" value={form.emp_type} onChange={handleChange} className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 w-36">
+                                    <option value="">= 선택 =</option>
+                                    <option value="1001">직원</option>
+                                    <option value="1002">비정규직</option>
+                                    <option value="1003">아르바이트</option>
+                                    <option value="1004">파견직</option>
+                                    <option value="1005">퇴사자</option>
+                                </select>
+                            </Row>
+                            <Row label="부서">
+                                <input type="text" name="department" placeholder="부서" value={form.department} onChange={handleChange} className={inputClass} />
+                            </Row>
+                        </div>
+
+                        <div className="border border-gray-100 rounded p-3">
+                            <Row label="직급">
+                                <input type="text" name="position" placeholder="직급" value={form.position} onChange={handleChange} className={inputClass} />
+                            </Row>
+                            <Row label="직책">
+                                <input type="text" name="job_title" placeholder="직책" value={form.job_title} onChange={handleChange} className={inputClass} />
+                            </Row>
+                        </div>
+
+                        {/* ===== 주소 정보 ===== */}
+                        <SectionTitle title="주소 정보" />
+
+                        <div className="border border-gray-100 rounded p-3 sm:col-span-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
+                                <Row label="우편번호">
+                                    <input type="text" name="postcode" placeholder="우편번호" value={form.postcode} onChange={handleChange} className={inputClass} />
+                                </Row>
+                                <Row label="기본주소">
+                                    <input type="text" name="address1" placeholder="기본주소" value={form.address1} onChange={handleChange} className={inputClass} />
+                                </Row>
+                                <Row label="상세주소">
+                                    <input type="text" name="address2" placeholder="상세주소" value={form.address2} onChange={handleChange} className={inputClass} />
+                                </Row>
                             </div>
-                        </Row>
-                        <Row label="이름" required>
-                            <Input name="name" placeholder="이름" />
-                        </Row>
-                        <Row label="닉네임">
-                            <Input name="nickname" placeholder="닉네임" />
-                        </Row>
-                    </div>
+                        </div>
 
-                    {/* 연락처 정보 */}
-                    <div className="px-6 pt-4 pb-2">
-                        <h2 className="text-base font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-2">
-                            연락처 정보
-                        </h2>
-                        <Row label="휴대폰번호" required>
-                            <Input name="mobile" placeholder="010-0000-0000" />
-                        </Row>
-                        <Row label="이메일" required>
-                            <Input name="email" type="email" placeholder="이메일" />
-                        </Row>
-                        <Row label="전화번호">
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    name="phone"
-                                    placeholder="전화번호"
-                                    value={form.phone}
-                                    onChange={handleChange}
-                                    className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
-                                />
-                                <input
-                                    type="text"
-                                    name="phone_ext"
-                                    placeholder="내선번호"
-                                    value={form.phone_ext}
-                                    onChange={handleChange}
-                                    className="w-24 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
-                                />
-                            </div>
-                        </Row>
-                    </div>
-
-                    {/* 직원 정보 */}
-                    <div className="px-6 pt-4 pb-2">
-                        <h2 className="text-base font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-2">
-                            직원 정보
-                        </h2>
-                        <Row label="직원여부">
-                            <select
-                                name="emp_type"
-                                value={form.emp_type}
-                                onChange={handleChange}
-                                className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 w-40"
-                            >
-                                <option value="">= 선택 =</option>
-                                <option value="1001">직원</option>
-                                <option value="1002">비정규직</option>
-                                <option value="1003">아르바이트</option>
-                                <option value="1004">파견직</option>
-                                <option value="1005">퇴사자</option>
-                            </select>
-                        </Row>
-                        <Row label="부서">
-                            <Input name="department" placeholder="부서" />
-                        </Row>
-                        <Row label="직급">
-                            <Input name="position" placeholder="직급" />
-                        </Row>
-                        <Row label="직책">
-                            <Input name="job_title" placeholder="직책" />
-                        </Row>
-                    </div>
-
-                    {/* 주소 정보 */}
-                    <div className="px-6 pt-4 pb-6">
-                        <h2 className="text-base font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-2">
-                            주소 정보
-                        </h2>
-                        <Row label="우편번호">
-                            <Input name="postcode" placeholder="우편번호" />
-                        </Row>
-                        <Row label="기본주소">
-                            <Input name="address1" placeholder="기본주소" />
-                        </Row>
-                        <Row label="상세주소">
-                            <Input name="address2" placeholder="상세주소" />
-                        </Row>
                     </div>
 
                     {/* 버튼 */}
-                    <div className="border-t px-6 py-4 flex flex-col sm:flex-row gap-3 justify-center">
+                    <div className="border-t mt-6 pt-4 flex flex-col sm:flex-row gap-3 justify-center">
                         <button
                             onClick={handleSubmit}
                             disabled={loading}
