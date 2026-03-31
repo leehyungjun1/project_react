@@ -1,18 +1,23 @@
-### 회원가입
-POST http://localhost:8080/api/auth/register
+### 관리자 가입
+POST http://localhost:8080/api/admin/auth/register
 Content-Type: application/json
 
 {
-  "email": "test@test.com",
+  "admin_id": "admin01",
   "password": "123456",
-  "nickname": "테스터"
+  "name": "홍길동",
+  "mobile": "010-1234-5678",
+  "email": "admin@test.com",
+  "postcode": "06236",
+  "address1": "서울시 강남구",
+  "address2": "101호"
 }
 
-### 로그인
-POST http://localhost:8080/api/auth/login
+### 관리자 로그인
+POST http://localhost:8080/api/admin/auth/login
 Content-Type: application/json
 
 {
-  "email": "test@test.com",
+  "admin_id": "admin01",
   "password": "123456"
 }

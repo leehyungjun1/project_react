@@ -4,6 +4,7 @@ import api from '../api/axios'
 
 function Login() {
     const navigate   = useNavigate()
+    const { login }                 = useAuth()
 
     // 입력값 상태
     const [form, setForm]     = useState({ email: '', password: '' })
