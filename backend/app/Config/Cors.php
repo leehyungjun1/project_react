@@ -29,6 +29,7 @@ class Cors extends BaseConfig
         'allowedHeaders'     => ['Content-Type', 'Authorization'],
         'allowedMethods'     => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         'allowedOriginsPatterns' => [],
+        'exposedHeaders'         => [],
         'supportsCredentials'    => false,
         'maxAge'                 => 7200,
     ];
