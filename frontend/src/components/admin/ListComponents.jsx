@@ -16,6 +16,7 @@ export const ListHeader = ({ total, keyword, perPage, onPerPageChange }) => (
                 onChange={(e) => onPerPageChange(e.target.value)}
                 className="border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-400 shrink-0"
             >
+                <option value="2">2개</option>
                 <option value="20">20개</option>
                 <option value="50">50개</option>
                 <option value="100">100개</option>

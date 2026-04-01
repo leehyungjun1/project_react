@@ -5,6 +5,7 @@ import * as FC from '../../../components/admin/FormComponents.jsx'
 import PageHeader from '../../../components/admin/PageHeader'
 import api from '../../../api/axios'
 import * as LC from '../../../components/admin/ListComponents'
+import { useSettingCodes } from '../../../hooks/useSettingCodes'
 import { showAlert, showConfirm } from '@/utils/modal'
 
 // 상태 뱃지
@@ -24,23 +25,16 @@ const StatusBadge = ({ value }) => {
 }
 
 // 레벨 뱃지
-const LevelBadge = ({ value }) => {
-    const map = {
-        '10': { label: '최고관리자', class: 'bg-purple-100 text-purple-700' },
-        '20': { label: '부관리자',   class: 'bg-indigo-100 text-indigo-700' },
-        '30': { label: '일반관리자', class: 'bg-gray-100 text-gray-700' },
-    }
-    const level = map[value] || { label: value, class: 'bg-gray-100 text-gray-700' }
-    return (
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${level.class}`}>
-            {level.label}
-        </span>
-    )
-}
 
 function AdminList() {
-    const navigate          = useNavigate()
-    const { token }         = useAdminAuth()
+    const navigate   = useNavigate()
+    const { token }                 = useAdminAuth()
+    const levelCodes                = useSettingCodes('100001', token)
+
+    const getLevelName = (code) => {
+        const found = levelCodes.find(opt => opt.code === code)
+        return found?.name ?? code ?? '-'
+    }
 
     const [list, setList]         = useState([])
     const [total, setTotal]       = useState(0)
@@ -286,7 +280,9 @@ function AdminList() {
                                     <td className="px-4 py-3 text-gray-500">{item.mobile}</td>
                                     <td className="px-4 py-3 text-gray-500">{item.email}</td>
                                     <td className="px-4 py-3">
-                                        <LevelBadge value={item.admin_level} />
+                                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
+                                            {getLevelName(item.admin_level)}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-3">
                                         <StatusBadge value={item.is_active} />
