@@ -16,4 +16,9 @@ $routes->group('api', function($routes) {
     // 관리자 인증
     $routes->post('admin/auth/register', 'Api\AdminAuthController::register');
     $routes->post('admin/auth/login',    'Api\AdminAuthController::login');
+
+    // 관리자 관리
+    $routes->get('admin/managers',                'Api\Admin\Managers\AdminController::index');
+    $routes->put('admin/managers/status/(:num)',  'Api\Admin\Managers\AdminController::updateStatus/$1');
+    $routes->delete('admin/managers/(:num)',      'Api\Admin\Managers\AdminController::delete/$1');
 });

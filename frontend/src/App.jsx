@@ -4,6 +4,7 @@ import Login         from './pages/Login'
 import Register      from './pages/Register'
 import AdminLogin    from './pages/admin/AdminLogin'
 import AdminRegister from './pages/admin/managers/AdminRegister.jsx'
+import AdminList     from './pages/admin/managers/AdminList'
 import AdminLayout   from './layouts/admin/AdminLayout'
 
 const AdminDashboard = () => <div><h1 className="text-xl font-bold">대시보드</h1></div>
@@ -25,6 +26,7 @@ function App() {
                 <AdminLayout>
                     <Routes>
                         <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="managers"          element={<AdminList />} />
                         <Route path="managers/register" element={<AdminRegister />} />
                     </Routes>
                 </AdminLayout>
