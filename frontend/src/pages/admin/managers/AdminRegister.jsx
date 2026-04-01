@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../../api/axios'
-import * as FC from '../../components/admin/FormComponents.jsx'
-import { useForm } from '../../hooks/useForm'
+import api from '../../../api/axios.js'
+import * as FC from '../../../components/admin/FormComponents.jsx'
+import { useForm } from '../../../hooks/useForm.js'
 
 function AdminRegister() {
     const navigate = useNavigate()
@@ -74,11 +74,6 @@ function AdminRegister() {
             <div className="max-w-7xl mx-auto">
 
                 {/* 헤더 */}
-                <div className="text-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">관리자 가입 신청</h1>
-                    <p className="text-sm text-gray-500 mt-1">가입 후 최고 관리자 승인이 필요합니다</p>
-                </div>
-
                 <div className="bg-white rounded-lg shadow p-6">
 
                     {/* 일반 에러 */}

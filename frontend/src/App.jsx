@@ -1,21 +1,34 @@
 import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
+import Home          from './pages/Home'
+import Login         from './pages/Login'
+import Register      from './pages/Register'
 import AdminLogin    from './pages/admin/AdminLogin'
-import AdminRegister from './pages/admin/AdminRegister'
+import AdminRegister from './pages/admin/managers/AdminRegister.jsx'
+import AdminLayout   from './layouts/admin/AdminLayout'
+
+const AdminDashboard = () => <div><h1 className="text-xl font-bold">대시보드</h1></div>
 
 function App() {
     return (
         <Routes>
             {/* 일반 사용자 */}
-            <Route path="/"       element={<Home />} />
-            <Route path="/login"  element={<Login />} />
+            <Route path="/"         element={<Home />} />
+            <Route path="/login"    element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* 관리자 */}
+            {/* 관리자 인증 (레이아웃 없음 - admin/* 보다 먼저!) */}
             <Route path="/admin/login"    element={<AdminLogin />} />
-            <Route path="/admin/register" element={<AdminRegister />} />
+
+
+            {/* 관리자 페이지 (레이아웃 있음) */}
+            <Route path="/admin/*" element={
+                <AdminLayout>
+                    <Routes>
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="managers/register" element={<AdminRegister />} />
+                    </Routes>
+                </AdminLayout>
+            } />
         </Routes>
     )
 }
