@@ -21,4 +21,11 @@ $routes->group('api', function($routes) {
     $routes->get('admin/managers',                'Api\Admin\Managers\AdminController::index');
     $routes->put('admin/managers/status/(:num)',  'Api\Admin\Managers\AdminController::updateStatus/$1');
     $routes->delete('admin/managers/(:num)',      'Api\Admin\Managers\AdminController::delete/$1');
+
+    // 설정 - 코드 관리
+    $routes->get('admin/settings/codes',           'Api\Admin\Settings\CodeController::index');
+    $routes->post('admin/settings/codes',          'Api\Admin\Settings\CodeController::store');
+    $routes->put('admin/settings/codes/(:num)',    'Api\Admin\Settings\CodeController::update/$1');
+    $routes->delete('admin/settings/codes/(:num)', 'Api\Admin\Settings\CodeController::delete/$1');
+    $routes->post('admin/settings/codes/reorder',  'Api\Admin\Settings\CodeController::reorder');
 });

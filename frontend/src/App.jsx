@@ -6,6 +6,7 @@ import AdminLogin    from './pages/admin/AdminLogin'
 import AdminRegister from './pages/admin/managers/AdminRegister.jsx'
 import AdminList     from './pages/admin/managers/AdminList'
 import AdminLayout   from './layouts/admin/AdminLayout'
+import CodeManage from './pages/admin/settings/CodeManage'
 
 const AdminDashboard = () => <div><h1 className="text-xl font-bold">대시보드</h1></div>
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/admin/login"    element={<AdminLogin />} />
 
 
+
             {/* 관리자 페이지 (레이아웃 있음) */}
             <Route path="/admin/*" element={
                 <AdminLayout>
@@ -28,6 +30,7 @@ function App() {
                         <Route path="dashboard" element={<AdminDashboard />} />
                         <Route path="managers"          element={<AdminList />} />
                         <Route path="managers/register" element={<AdminRegister />} />
+                        <Route path="settings/codes" element={<CodeManage />} />
                     </Routes>
                 </AdminLayout>
             } />
