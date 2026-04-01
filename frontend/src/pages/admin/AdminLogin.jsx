@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAdminAuth } from '../../context/AdminAuthContext'
+import AdminJoinModal from '../../components/admin/AdminJoinModal'
 import api from '../../api/axios'
 
 function AdminLogin() {
@@ -10,6 +11,7 @@ function AdminLogin() {
     const [form, setForm]       = useState({ admin_id: '', password: '' })
     const [error, setError]     = useState('')
     const [loading, setLoading] = useState(false)
+    const [joinModal, setJoinModal] = useState(false)
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value })
@@ -77,14 +79,18 @@ function AdminLogin() {
                 <p className="text-center text-sm text-gray-500 mt-4">
                     계정이 없으신가요?{' '}
                     <span
-                        onClick={() => navigate('/admin/managers/register')}
+                        onClick={() => setJoinModal(true)}
                         className="text-orange-500 cursor-pointer hover:underline"
                     >
                         가입 신청
                     </span>
                 </p>
-
             </div>
+            {/* 가입 신청 모달 */}
+            <AdminJoinModal
+                show={joinModal}
+                onClose={() => setJoinModal(false)}
+            />
         </div>
     )
 }

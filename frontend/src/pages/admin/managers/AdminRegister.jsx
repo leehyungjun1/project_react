@@ -4,9 +4,18 @@ import api from '../../../api/axios'
 import * as FC from '../../../components/admin/FormComponents.jsx'
 import { useForm } from '../../../hooks/useForm'
 import PageHeader from '../../../components/admin/PageHeader'
+import { useSettingCodes } from '../../../hooks/useSettingCodes'
+import { useAdminAuth } from '../../../context/AdminAuthContext'
+import { showAlert } from '@/utils/modal'
+
 
 function AdminRegister() {
     const navigate = useNavigate()
+    const { token } = useAdminAuth()
+    // 코드 목록
+    const positionCodes = useSettingCodes('100002', token) // 직급
+    const jobTitleCodes = useSettingCodes('100003', token) // 직책
+    const levelCodes  = useSettingCodes('100001', token) // 등급
 
     const {
         form,
@@ -34,6 +43,7 @@ function AdminRegister() {
         postcode        : '',
         address1        : '',
         address2        : '',
+        is_active       : '1002',
     })
 
     const [loading, setLoading] = useState(false)
@@ -50,18 +60,21 @@ function AdminRegister() {
         setLoading(true)
 
         try {
-            await api.post('/admin/auth/register', {
+            await api.post('/admin/managers', {
                 ...form,
                 email: `${form.email_id}@${form.email_domain}`,
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             })
-            alert('가입 신청이 완료되었습니다.\n최고 관리자 승인 후 로그인 가능합니다.')
-            navigate('/admin/login')
+            showAlert('success', '등록 완료', '관리자가 등록되었습니다.', () => {
+                navigate('/admin/managers')
+            })
         } catch (err) {
             const msg = err.response?.data?.message
             if (typeof msg === 'object') {
                 setErrors(msg)
             } else {
-                setErrors({ general: msg || '가입 신청 실패' })
+                showAlert('error', '등록 실패', msg || '등록 실패')
             }
         } finally {
             setLoading(false)
@@ -210,14 +223,58 @@ function AdminRegister() {
                         <FC.Row label="부서">
                             <input type="text" name="department" placeholder="부서" value={form.department} onChange={handleChange} className={FC.inputClass} />
                         </FC.Row>
+                        <FC.Row label="등급">
+                            <select name="admin_level" value={form.admin_level} onChange={handleChange} className={FC.selectClass + ' w-full'}>
+                                <option value="">= 선택 =</option>
+                                {levelCodes.map(opt => (
+                                    <option key={opt.id} value={opt.code}>{opt.name}</option>
+                                ))}
+                            </select>
+                        </FC.Row>
                     </div>
 
                     <div className="border border-gray-100 rounded p-3">
                         <FC.Row label="직급">
-                            <input type="text" name="position" placeholder="직급" value={form.position} onChange={handleChange} className={FC.inputClass} />
+                            <select name="position" value={form.position} onChange={handleChange} className={FC.selectClass + ' w-full'}>
+                                <option value="">= 선택 =</option>
+                                {positionCodes.map(opt => (
+                                    <option key={opt.id} value={opt.code}>{opt.name}</option>
+                                ))}
+                            </select>
                         </FC.Row>
                         <FC.Row label="직책">
-                            <input type="text" name="job_title" placeholder="직책" value={form.job_title} onChange={handleChange} className={FC.inputClass} />
+                            <select name="job_title" value={form.job_title} onChange={handleChange} className={FC.selectClass + ' w-full'}>
+                                <option value="">= 선택 =</option>
+                                {jobTitleCodes.map(opt => (
+                                    <option key={opt.id} value={opt.code}>{opt.name}</option>
+                                ))}
+                            </select>
+                        </FC.Row>
+                        <FC.Row label="승인여부">
+                            <div className="flex items-center gap-4 pt-1.5">
+                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="is_active"
+                                        value="1002"
+                                        checked={form.is_active === '1002'}
+                                        onChange={handleChange}
+                                        className="accent-orange-500"
+                                    />
+                                    승인
+                                </label>
+                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="is_active"
+                                        value="1001"
+                                        checked={form.is_active === '1001'}
+                                        onChange={handleChange}
+                                        className="accent-orange-500"
+                                    />
+                                    미승인
+                                </label>
+                            </div>
                         </FC.Row>
                     </div>
 
