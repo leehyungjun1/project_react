@@ -7,6 +7,7 @@ import AdminRegister from './pages/admin/managers/AdminRegister.jsx'
 import AdminList     from './pages/admin/managers/AdminList'
 import AdminLayout   from './layouts/admin/AdminLayout'
 import CodeManage from './pages/admin/settings/CodeManage'
+import AdminDetail from './pages/admin/managers/AdminDetail'
 
 const AdminDashboard = () => <div><h1 className="text-xl font-bold">대시보드</h1></div>
 
@@ -30,7 +31,8 @@ function App() {
                         <Route path="dashboard" element={<AdminDashboard />} />
                         <Route path="managers"          element={<AdminList />} />
                         <Route path="managers/register" element={<AdminRegister />} />
-                        <Route path="settings/codes" element={<CodeManage />} />
+                        <Route path="managers/:id"      element={<AdminDetail />} />
+                        <Route path="settings/codes"    element={<CodeManage />} />
                     </Routes>
                 </AdminLayout>
             } />

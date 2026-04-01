@@ -15,9 +15,6 @@ export const AlertModal = ({ show, type = 'success', title, message, onClose }) 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-            {/* 오버레이 */}
-            <div className="absolute inset-0 bg-black/20" onClick={onClose} />
-
             {/* 모달 */}
             <div className="relative bg-white rounded-xl shadow-xl w-80 p-6 text-center">
                 <Icon className={`${color} mx-auto mb-3`} size={48} />
@@ -49,9 +46,6 @@ export const ConfirmModal = ({ show, type = 'warning', title, message, onConfirm
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
-            {/* 오버레이 */}
-            <div className="absolute inset-0 bg-black bg-opacity-20" onClick={onCancel} />
-
             {/* 모달 */}
             <div className="relative bg-white rounded-xl shadow-xl w-80 p-6 text-center">
                 <Icon className={`${color} mx-auto mb-3`} size={48} />

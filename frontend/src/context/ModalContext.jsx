@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 import { AlertModal, ConfirmModal } from '../components/admin/Modal'
+import { registerModal } from '../utils/modal'
 
 const ModalContext = createContext(null)
 
@@ -16,6 +17,10 @@ export function ModalProvider({ children }) {
     const showConfirm = (title, message, onConfirm, type = 'warning') => {
         setConfirmModal({ show: true, type, title, message, onConfirm })
     }
+
+    useEffect(() => {
+        registerModal(showAlert, showConfirm)
+    }, [])
 
     return (
         <ModalContext.Provider value={{ showAlert, showConfirm }}>
@@ -39,7 +44,10 @@ export function ModalProvider({ children }) {
                 type={confirmModal.type}
                 title={confirmModal.title}
                 message={confirmModal.message}
-                onConfirm={confirmModal.onConfirm}
+                onConfirm={() => {
+                    setConfirmModal({ show: false })
+                    if (confirmModal.onConfirm) confirmModal.onConfirm()
+                }}
                 onCancel={() => setConfirmModal({ show: false })}
             />
         </ModalContext.Provider>

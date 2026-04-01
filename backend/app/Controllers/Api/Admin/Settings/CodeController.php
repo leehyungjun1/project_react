@@ -191,10 +191,17 @@ class CodeController extends ResourceController
     // 특정 코드로 시작하는 자식 코드 목록
     public function getByCode($code)
     {
-        $db   = \Config\Database::connect();
+        $db     = \Config\Database::connect();
+        $parent = $db->table('settings')->where('code', $code)->get()->getRowArray();
+
+        if (!$parent) {
+            return $this->respond(['status' => true, 'data' => []]);
+        }
+
         $list = $db->table('settings')
-            ->like('code', $code, 'after')
+            ->like('code', $code, 'after')  // code가 100001로 시작하는
             ->where('is_active', 1)
+            ->where('depth >', $parent['depth'])  // ✅ 부모보다 depth가 큰 것만
             ->orderBy('order_no', 'ASC')
             ->get()
             ->getResultArray();

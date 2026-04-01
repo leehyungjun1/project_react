@@ -6,7 +6,7 @@ export function useSettingCodes(code, token) {
     const [options, setOptions] = useState([])
 
     useEffect(() => {
-        if (!code) return
+        if (!code || !token) return
         api.get(`/admin/settings/codes/by/${code}`, {
             headers: { Authorization: `Bearer ${token}` }
         }).then(res => {
@@ -14,7 +14,7 @@ export function useSettingCodes(code, token) {
         }).catch(err => {
             console.error(err)
         })
-    }, [code])
+    }, [code, token])
 
     return options
 }

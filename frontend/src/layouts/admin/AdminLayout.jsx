@@ -46,8 +46,6 @@ function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-
-    console.log('mobileMenuOpen:', mobileMenuOpen)
     // 현재 경로에 맞는 메뉴 찾기
     const currentMenu = menus.find(m => {
         if (m.path === '/admin/dashboard') return false

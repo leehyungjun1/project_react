@@ -30,10 +30,12 @@ $routes->group('api', function($routes) {
 
             // 관리자 관리
             $routes->group('managers', function($routes) {
-                $routes->get('',                  'Api\Admin\Managers\AdminController::index');
-                $routes->post('',                 'Api\Admin\Managers\AdminController::store');
-                $routes->put('status/(:num)',     'Api\Admin\Managers\AdminController::updateStatus/$1');
-                $routes->delete('(:num)',         'Api\Admin\Managers\AdminController::delete/$1');
+                $routes->get('',           'Api\Admin\Managers\AdminController::index');
+                $routes->post('',          'Api\Admin\Managers\AdminController::store');
+                $routes->get('(:num)',     'Api\Admin\Managers\AdminController::show/$1');
+                $routes->post('(:num)',    'Api\Admin\Managers\AdminController::store/$1');
+                $routes->put('status/(:num)', 'Api\Admin\Managers\AdminController::updateStatus/$1');
+                $routes->delete('(:num)', 'Api\Admin\Managers\AdminController::delete/$1');
             });
 
             // 설정

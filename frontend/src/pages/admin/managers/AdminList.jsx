@@ -5,6 +5,7 @@ import * as FC from '../../../components/admin/FormComponents.jsx'
 import PageHeader from '../../../components/admin/PageHeader'
 import api from '../../../api/axios'
 import * as LC from '../../../components/admin/ListComponents'
+import { showAlert, showConfirm } from '@/utils/modal'
 
 // 상태 뱃지
 const StatusBadge = ({ value }) => {
@@ -115,28 +116,28 @@ function AdminList() {
 
     // 상태 변경
     const handleStatusChange = async (id, isActive) => {
-        if (!confirm('상태를 변경하시겠습니까?')) return
-        try {
-            await api.put(`/admin/managers/status/${id}`, { is_active: isActive }, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-            fetchList()
-        } catch (err) {
-            alert('상태 변경 실패')
-        }
+        showConfirm('상태 변경', '상태를 변경하시겠습니까?', async () => {
+            try {
+                await api.put(`/admin/managers/status/${id}`, { is_active: isActive })
+                fetchList()
+            } catch (err) {
+                showAlert('error', '오류', '상태 변경 실패')
+            }
+        })
     }
 
     // 삭제
     const handleDelete = async (id) => {
-        if (!confirm('삭제하시겠습니까?')) return
-        try {
-            await api.delete(`/admin/managers/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
-            fetchList()
-        } catch (err) {
-            alert('삭제 실패')
-        }
+        showConfirm('삭제', '정말 삭제하시겠습니까?', async () => {
+            try {
+                await api.delete(`/admin/managers/${id}`)
+                showAlert('success', '삭제 완료', '삭제되었습니다.', () => {
+                    fetchList()
+                })
+            } catch (err) {
+                showAlert('error', '오류', '삭제 실패')
+            }
+        })
     }
 
     return (
