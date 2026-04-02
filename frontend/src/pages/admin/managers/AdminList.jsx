@@ -169,9 +169,9 @@ function AdminList() {
                         <label className="block text-xs text-gray-500 mb-1">관리자 레벨</label>
                         <select name="admin_level" value={filter.admin_level} onChange={handleFilterChange} className={FC.selectClass + ' w-full'}>
                             <option value="">전체</option>
-                            <option value="10">최고관리자</option>
-                            <option value="20">부관리자</option>
-                            <option value="30">일반관리자</option>
+                            {levelCodes.map(opt => (
+                                <option key={opt.id} value={opt.code}>{opt.name}</option>
+                            ))}
                         </select>
                     </div>
 
