@@ -1,13 +1,7 @@
-### 게시글 목록
-GET http://localhost:8080/api/admin/boards/notice/posts
-
-### 게시글 등록
-POST http://localhost:8080/api/admin/boards/notice/posts
+PUT http://localhost:8080/api/admin/boards/qna/posts/3
 Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjEiLCJhZG1pbl9pZCI6ImFkbWluIiwibmFtZSI6Ilx1Yzc3NFx1ZDYxNVx1YzkwMCIsImFkbWluX2xldmVsIjoiMTAwMDAxMDAxIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc3NTEzMjQ3MywiZXhwIjoxNzc1MjE4ODczfQ.PXQO_gSFyJ3R4UZz4WRPHDEI_8lbd6M1_It_5omD_2A
 
 {
-  "title"    : "공지사항 테스트",
-  "content"  : "내용입니다.",
-  "is_notice": 1,
-  "is_use"   : 1
+"status": "answered"
 }

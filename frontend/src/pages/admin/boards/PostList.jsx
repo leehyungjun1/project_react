@@ -40,7 +40,11 @@ function PostList() {
     }
 
     useEffect(() => {
-        fetchList()
+        if (board?.skin_type === 'qna') {
+            fetchList({ ...filter, depth: 0 })
+        } else {
+            fetchList()
+        }
     }, [boardCode])
 
     // 공통 props

@@ -31,10 +31,22 @@ class PostController extends ResourceController
         $searchType = $this->request->getGet('search_type') ?? 'title';
         $isUse      = $this->request->getGet('is_use');
         $isNotice   = $this->request->getGet('is_notice');
+        $parentId   = $this->request->getGet('parent_id');
+        $depth      = $this->request->getGet('depth');
         $page       = (int)($this->request->getGet('page')     ?? 1);
         $perPage    = (int)($this->request->getGet('per_page') ?? 20);
 
         $postModel->where('deleted_at', null);
+
+        if ($board['skin_type'] === 'qna' && ($parentId === null || $parentId === '')) {
+            $postModel->where('depth', 0);
+        } else if ($parentId !== null && $parentId !== '') {
+            $postModel->where('parent_id', $parentId);
+            if ($depth !== null && $depth !== '') {
+                $postModel->where('depth', $depth);
+            }
+        }
+
 
         if ($keyword) {
             $postModel->groupStart()->like($searchType, $keyword)->groupEnd();

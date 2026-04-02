@@ -12,19 +12,19 @@ function QnaSkin({ board, list, total, lastPage, loading, filter, setFilter, fet
     const handleSearch = () => {
         const newFilter = { ...filter, page: 1 }
         setFilter(newFilter)
-        fetchList(newFilter)
+        fetchList({ ...newFilter, depth: 0 })
     }
 
     const handleReset = () => {
         const newFilter = { keyword: '', search_type: 'title', is_use: '', is_notice: '', page: 1, per_page: 20 }
         setFilter(newFilter)
-        fetchList(newFilter)
+        fetchList({ ...newFilter, depth: 0 })
     }
 
     const handlePageChange = (page) => {
         const newFilter = { ...filter, page }
         setFilter(newFilter)
-        fetchList(newFilter)
+        fetchList({ ...newFilter, depth: 0 })
     }
 
     const handleDelete = (id, title) => {
