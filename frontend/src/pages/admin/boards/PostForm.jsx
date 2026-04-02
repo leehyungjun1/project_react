@@ -11,15 +11,16 @@ import { FaTrash, FaFile } from 'react-icons/fa6'
 function PostForm() {
     const navigate          = useNavigate()
     const { boardCode, id } = useParams()
-    const isEdit            = !!id
+    const isEdit                  = !!id
     const editorRef         = useRef(null)
     const fileInputRef      = useRef(null)
 
-    const [board, setBoard]             = useState(null)
-    const [loading, setLoading]         = useState(false)
-    const [pageLoading, setPageLoading] = useState(true)
-    const [files, setFiles]             = useState([])       // 업로드된 파일 목록
-    const [uploading, setUploading]     = useState(false)    // 파일 업로드 중
+    const [board, setBoard]                         = useState(null)
+    const [loading, setLoading]             = useState(false)
+    const [pageLoading, setPageLoading]     = useState(true)
+    const [files, setFiles]                   = useState([])
+    const [thumbnail, setThumbnail] = useState(null)
+    const [uploading, setUploading]     = useState(false)
 
     const [form, setForm] = useState({
         title          : '',
@@ -102,7 +103,13 @@ function PostForm() {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
 
-            setFiles(prev => [...prev, ...res.data.data])
+            console.log('파일 업로드 응답:', res.data)
+
+            setFiles(prev => [...prev, ...res.data.data.files])
+
+            if (!thumbnail && res.data.data.thumbnail) {
+                setThumbnail(res.data.data.thumbnail)
+            }
         } catch (err) {
             showAlert('error', '오류', '파일 업로드 실패')
         } finally {
@@ -133,11 +140,15 @@ function PostForm() {
         if (!form.title) return showAlert('warning', '입력 오류', '제목을 입력해 주세요.')
 
         const content = editorRef.current?.getInstance().getHTML()
+
         if (!content || content === '<p><br></p>') return showAlert('warning', '입력 오류', '내용을 입력해 주세요.')
+
+        console.log('thumbnail:', thumbnail)  // ✅ 추가
+        console.log('payload:', { ...form, content, files, thumbnail })
 
         setLoading(true)
         try {
-            const payload = { ...form, content, files }
+            const payload = { ...form, content, files, thumbnail }
 
             if (isEdit) {
                 await api.put(`/admin/boards/${boardCode}/posts/${id}`, payload)
@@ -264,6 +275,27 @@ function PostForm() {
                                 <span>파일은 최대 {board?.file_count ?? 10}개까지 다중업로드가 가능합니다.</span>
                                 <span>파일 업로드 최대 사이즈는 {board?.file_size ?? 10}MB 입니다.</span>
                             </div>
+
+                            {/* 갤러리형 썸네일 미리보기 */}
+                            {board?.skin_type === 'gallery' && thumbnail && (
+                                <div className="mt-3">
+                                    <p className="text-xs text-gray-500 mb-1">썸네일 미리보기</p>
+                                    <div className="relative w-32 h-32 rounded overflow-hidden border border-gray-200">
+                                        <img
+                                            src={`http://localhost:8080/${thumbnail}`}
+                                            alt="썸네일"
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setThumbnail(null)}
+                                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* 첨부된 파일 목록 */}
                             {files.length > 0 && (

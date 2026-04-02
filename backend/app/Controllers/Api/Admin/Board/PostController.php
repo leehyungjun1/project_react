@@ -139,6 +139,7 @@ class PostController extends ResourceController
             'is_use'      => $json['is_use']      ?? 1,
             'status'      => $json['status']      ?? 'normal',
             'category_id' => $json['category_id'] ?? null,
+            'thumbnail'      => $json['thumbnail']       ?? null,
             'event_start_at' => $json['event_start_at'] ?? null,
             'event_end_at'   => $json['event_end_at']   ?? null,
             'ip'          => $this->request->getIPAddress(),
@@ -199,6 +200,7 @@ class PostController extends ResourceController
             'is_use'      => $json['is_use']       ?? $post['is_use'],
             'status'      => $json['status']       ?? $post['status'],
             'category_id' => $json['category_id']  ?? $post['category_id'],
+            'thumbnail'      => $json['thumbnail']   ?? $post['thumbnail'],
             'event_start_at' => $json['event_start_at'] ?? $post['event_start_at'],
             'event_end_at'   => $json['event_end_at']   ?? $post['event_end_at'],
         ]);

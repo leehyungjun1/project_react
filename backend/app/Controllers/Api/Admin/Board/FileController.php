@@ -24,7 +24,6 @@ class FileController extends ResourceController
         $uploadedFiles = [];
         $uploadPath    = FCPATH . 'uploads/boards/' . $boardCode . '/';
 
-        // 업로드 폴더 생성
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
@@ -33,11 +32,14 @@ class FileController extends ResourceController
             if (!$file->isValid()) continue;
 
             $originalName = $file->getClientName();
-            $savedName    = $file->getRandomName();;
+            $savedName    = $file->getRandomName();
             $fileSize     = $file->getSize();
             $fileType     = $file->getMimeType();
 
             $file->move($uploadPath, $savedName);
+
+            // ✅ 이미지 여부 체크
+            $isImage = str_starts_with($fileType, 'image/');
 
             $uploadedFiles[] = [
                 'original_name' => $originalName,
@@ -45,12 +47,24 @@ class FileController extends ResourceController
                 'file_path'     => 'uploads/boards/' . $boardCode . '/' . $savedName,
                 'file_size'     => $fileSize,
                 'file_type'     => $fileType,
+                'is_image'      => $isImage,  // ✅ 이미지 여부
             ];
+        }
+
+        $thumbnail = null;
+        foreach ($uploadedFiles as $file) {
+            if ($file['is_image']) {
+                $thumbnail = $file['file_path'];
+                break;
+            }
         }
 
         return $this->respond([
             'status' => true,
-            'data'   => $uploadedFiles,
+            'data'   => [
+                'files'     => $uploadedFiles,
+                'thumbnail' => $thumbnail,  // ✅ 썸네일 경로
+            ],
         ], ResponseInterface::HTTP_CREATED);
     }
 
