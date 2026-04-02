@@ -250,6 +250,12 @@ function BoardList() {
                                             >
                                                 삭제
                                             </button>
+                                            <button
+                                                onClick={() => navigate(`/admin/boards/${item.board_code}/posts`)}
+                                                className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                                            >
+                                                게시글
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

@@ -21,32 +21,46 @@ class BoardTableService
             return true;
         }
 
-        $this->forge->addField([
-            'id' => ['type' => 'INT', 'unsigned' => true, 'auto_increment' => true],
-            'board_id' => ['type' => 'INT', 'unsigned' => true],                              // boards.id
-            'group_id' => ['type' => 'INT', 'unsigned' => true, 'null' => true],              // 그룹 ID (묶음글)
-            'parent_id' => ['type' => 'INT', 'unsigned' => true, 'null' => true],              // 부모글 ID (답글)
-            'depth' => ['type' => 'TINYINT', 'default' => 0],                              // 깊이 (0=원글, 1=답글)
-            'order_no' => ['type' => 'INT', 'default' => 0],                                  // 정렬순서
-            'header_id' => ['type' => 'INT', 'unsigned' => true, 'null' => true],              // 말머리 ID
-            'title' => ['type' => 'VARCHAR', 'constraint' => 255],                         // 제목
-            'content' => ['type' => 'LONGTEXT', 'null' => true],                             // 내용
-            'rating' => ['type' => 'DECIMAL', 'constraint' => '3,1', 'default' => 0],      // 별점
-            'writer_type' => ['type' => 'ENUM', 'constraint' => ['guest', 'user', 'admin'], 'default' => 'guest'], // 작성자 타입
-            'writer_id' => ['type' => 'INT', 'unsigned' => true, 'null' => true],              // 작성자 ID (user_id or admin_id)
-            'writer' => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true],          // 작성자명
-            'is_notice' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],           // 공지 여부
-            'is_secret' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],           // 비밀글 여부
-            'category_id' => ['type' => 'INT', 'unsigned' => true, 'null' => true],              // 카테고리 ID
-            'is_use' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 1],           // 사용여부
-            'status' => ['type' => 'VARCHAR', 'constraint' => 20, 'default' => 'pending'],  // 상태 (1:1문의: pending/answered)
-            'hit' => ['type' => 'INT', 'default' => 0],                                  // 조회수
-            'is_main' => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],           // 메인 노출 여부
-            'ip' => ['type' => 'VARCHAR', 'constraint' => 45, 'null' => true],          // 작성자 IP
-            'created_at' => ['type' => 'DATETIME', 'null' => true],
-            'updated_at' => ['type' => 'DATETIME', 'null' => true],
-            'deleted_at' => ['type' => 'DATETIME', 'null' => true],
-        ]);
+        더 보기
+오후 6:17
+author_password, thumbnail, event_start_at, event_end_at, rating_count, comment_count, file_count 필드들이 빠져 있네요!
+
+    BoardTableService.php 수정:
+
+php
+$this->forge->addField([
+    'id'              => ['type' => 'INT', 'unsigned' => true, 'auto_increment' => true],
+    'board_id'        => ['type' => 'INT', 'unsigned' => true],
+    'group_id'        => ['type' => 'INT', 'unsigned' => true, 'null' => true],
+    'parent_id'       => ['type' => 'INT', 'unsigned' => true, 'null' => true],
+    'depth'           => ['type' => 'TINYINT', 'default' => 0],
+    'order_no'        => ['type' => 'INT', 'default' => 0],
+    'header_id'       => ['type' => 'INT', 'unsigned' => true, 'null' => true],
+    'writer_type'     => ['type' => 'ENUM', 'constraint' => ['guest', 'user', 'admin'], 'default' => 'guest'],
+    'writer_id'       => ['type' => 'INT', 'unsigned' => true, 'null' => true],
+    'writer'          => ['type' => 'VARCHAR', 'constraint' => 50, 'null' => true],
+    'author_password' => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
+    'title'           => ['type' => 'VARCHAR', 'constraint' => 255],
+    'content'         => ['type' => 'LONGTEXT', 'null' => true],
+    'category_id'     => ['type' => 'INT', 'unsigned' => true, 'null' => true],
+    'is_notice'       => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],
+    'is_secret'       => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],
+    'is_main'         => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 0],
+    'is_use'          => ['type' => 'TINYINT', 'constraint' => 1, 'default' => 1],
+    'status'          => ['type' => 'VARCHAR', 'constraint' => 20, 'default' => 'normal'],
+    'rating'          => ['type' => 'DECIMAL', 'constraint' => '3,1', 'default' => 0],
+    'rating_count'    => ['type' => 'INT', 'default' => 0],
+    'comment_count'   => ['type' => 'INT', 'default' => 0],
+    'file_count'      => ['type' => 'INT', 'default' => 0],
+    'hit'             => ['type' => 'INT', 'default' => 0],
+    'thumbnail'       => ['type' => 'VARCHAR', 'constraint' => 255, 'null' => true],
+    'event_start_at'  => ['type' => 'DATETIME', 'null' => true],
+    'event_end_at'    => ['type' => 'DATETIME', 'null' => true],
+    'ip'              => ['type' => 'VARCHAR', 'constraint' => 45, 'null' => true],
+    'created_at'      => ['type' => 'DATETIME', 'null' => true],
+    'updated_at'      => ['type' => 'DATETIME', 'null' => true],
+    'deleted_at'      => ['type' => 'DATETIME', 'null' => true],
+]);
 
         $this->forge->addPrimaryKey('id');
         $this->forge->addKey('board_id');   // 인덱스

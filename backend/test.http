@@ -1,14 +1,13 @@
-POST http://localhost:8080/api/admin/boards
+### 게시글 목록
+GET http://localhost:8080/api/admin/boards/notice/posts
+
+### 게시글 등록
+POST http://localhost:8080/api/admin/boards/notice/posts
 Content-Type: application/json
 
 {
-  "board_code"  : "notice",
-  "board_name"  : "공지사항",
-  "skin_type"   : "normal",
-  "description" : "공지사항 게시판입니다.",
-  "use_comment" : 1,
-  "use_rating"  : 0,
-  "use_file"    : 1,
-  "use_secret"  : 0,
-  "list_count"  : 20
+  "title"    : "공지사항 테스트",
+  "content"  : "내용입니다.",
+  "is_notice": 1,
+  "is_use"   : 1
 }
