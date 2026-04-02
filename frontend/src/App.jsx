@@ -15,10 +15,12 @@ import AdminLogin from './pages/admin/AdminLogin'
 
 // 관리자 페이지 컴포넌트
 // import AdminDashboard from './pages/admin/AdminDashboard'
-import AdminList      from './pages/admin/managers/AdminList'
-import AdminRegister  from './pages/admin/managers/AdminRegister'
-import AdminDetail    from './pages/admin/managers/AdminDetail'
-import CodeManage     from './pages/admin/settings/CodeManage'
+import AdminList        from './pages/admin/managers/AdminList'
+import AdminRegister    from './pages/admin/managers/AdminRegister'
+import AdminDetail      from './pages/admin/managers/AdminDetail'
+import CodeManage       from './pages/admin/settings/CodeManage'
+import BoardList        from './pages/admin/boards/BoardList'
+import BoardForm        from './pages/admin/boards/BoardForm'
 
 // 일반 사용자 라우트 배열
 const publicRoutes = [
@@ -33,6 +35,9 @@ const adminRoutes = [
     { path: 'managers/register', element: <AdminRegister /> },
     { path: 'managers/:id', element: <AdminDetail /> },
     { path: 'settings/codes', element: <CodeManage /> },
+    { path: 'boards', element: <BoardList /> },
+    { path: 'boards/create', element: <BoardForm /> },
+    { path: 'boards/:id', element: <BoardForm /> },
 ]
 
 function App() {

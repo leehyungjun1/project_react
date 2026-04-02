@@ -35,9 +35,12 @@ class JwtHelper
         }
     }
 
-    public static function decodeToken(string $token): ?array
+    public static function decodeToken(string $token): object|null
     {
-        $decoded = self::validateToken($token);
-        return $decoded ? (array) $decoded : null;
+        try {
+            return JWT::decode($token, new Key(self::getKey(), self::$algo));
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
