@@ -6,9 +6,9 @@ React Router v6의 **중첩 라우트(Nested Routes)** 패턴을 적용했습니
 
 \`\`\`jsx
 <Route path="/admin" element={
-<AdminProtectedRoute>
-<AdminLayout />   {/* 내부에서 <Outlet />으로 자식 렌더링 */}
-</AdminProtectedRoute>
+  <AdminProtectedRoute>
+    <AdminLayout />   {/* 내부에서 <Outlet />으로 자식 렌더링 */}
+  </AdminProtectedRoute>
 }>
 <Route path="dashboard"         element={<AdminDashboard />} />
 <Route path="managers"          element={<AdminList />} />
