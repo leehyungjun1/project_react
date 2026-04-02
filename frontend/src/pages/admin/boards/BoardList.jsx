@@ -23,14 +23,30 @@ const SkinBadge = ({ value }) => {
 
 function BoardList() {
     const navigate            = useNavigate()
-    const [list, setList]     = useState([])
-    const [loading, setLoading] = useState(false)
+    const [list, setList]             = useState([])
+    const [loading, setLoading]     = useState(false)
 
-    const fetchList = async () => {
+    const [filter, setFilter] = useState({
+        keyword    : '',
+        skin_type  : '',
+        is_active  : '',
+        page       : 1,
+        per_page   : 20,
+    })
+
+    const [total, setTotal]         = useState(0)
+    const [lastPage, setLastPage]   = useState(1)
+
+
+
+    // 목록 조회
+    const fetchList = async (params = filter) => {
         setLoading(true)
         try {
-            const res = await api.get('/admin/boards')
-            setList(res.data.data)
+            const res = await api.get('/admin/boards', { params })
+            setList(res.data.data.list)      // ✅
+            setTotal(res.data.data.total)
+            setLastPage(res.data.data.last_page)
         } catch (err) {
             showAlert('error', '오류', '목록을 불러오는데 실패했습니다.')
         } finally {
@@ -41,6 +57,39 @@ function BoardList() {
     useEffect(() => {
         fetchList()
     }, [])
+
+    // 필터 변경
+    const handleFilterChange = (e) => {
+        setFilter({ ...filter, [e.target.name]: e.target.value })
+    }
+
+    // 검색
+    const handleSearch = () => {
+        const newFilter = { ...filter, page: 1 }
+        setFilter(newFilter)
+        fetchList(newFilter)
+    }
+
+    // 초기화
+    const handleReset = () => {
+        const newFilter = {
+            keyword     : '',
+            search_type : 'name',
+            is_active   : '',
+            skin_type   : '',
+            page        : 1,
+            per_page    : 20,
+        }
+        setFilter(newFilter)
+        fetchList(newFilter)
+    }
+
+    // 페이지 변경
+    const handlePageChange = (page) => {
+        const newFilter = { ...filter, page }
+        setFilter(newFilter)
+        fetchList(newFilter)
+    }
 
     const handleDelete = (id, name) => {
         showConfirm('삭제', `"${name}" 게시판을 삭제하시겠습니까?`, async () => {
@@ -71,10 +120,64 @@ function BoardList() {
                 }
             />
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 text-sm text-gray-500">
-                    총 <span className="font-bold text-gray-800">{list.length}</span> 건
+            {/* ===== 검색 필터 ===== */}
+            <div className="bg-white rounded-lg shadow p-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+
+                    {/* 스킨 */}
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">스킨</label>
+                        <select name="skin_type" value={filter.skin_type} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+                            <option value="">전체</option>
+                            <option value="normal">일반형</option>
+                            <option value="gallery">갤러리형</option>
+                            <option value="qna">1:1문의형</option>
+                            <option value="event">이벤트형</option>
+                        </select>
+                    </div>
+
+                    {/* 사용여부 */}
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">사용여부</label>
+                        <select name="is_active" value={filter.is_active} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+                            <option value="">전체</option>
+                            <option value="1">사용</option>
+                            <option value="0">미사용</option>
+                        </select>
+                    </div>
                 </div>
+
+                {/* 키워드 검색 */}
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        name="keyword"
+                        placeholder="게시판명 또는 코드 검색"
+                        value={filter.keyword}
+                        onChange={handleFilterChange}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                        className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                    />
+                    <button onClick={handleSearch} className="shrink-0 bg-orange-500 text-white text-sm px-4 py-1.5 rounded hover:bg-orange-600">
+                        검색
+                    </button>
+                    <button onClick={handleReset} className="shrink-0 bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded hover:bg-gray-300">
+                        초기화
+                    </button>
+                </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                <LC.ListHeader
+                    total={total}
+                    keyword={filter.keyword}
+                    perPage={filter.per_page}
+                    onPerPageChange={(value) => {
+                        const newFilter = { ...filter, per_page: value, page: 1 }
+                        setFilter(newFilter)
+                        fetchList(newFilter)
+                    }}
+                />
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -149,6 +252,14 @@ function BoardList() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* 페이지네이션 */}
+                <LC.Pagination
+                    page={filter.page}
+                    lastPage={lastPage}
+                    total={total}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     )

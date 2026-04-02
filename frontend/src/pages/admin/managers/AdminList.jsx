@@ -28,8 +28,7 @@ const StatusBadge = ({ value }) => {
 
 function AdminList() {
     const navigate   = useNavigate()
-    const { token }                 = useAdminAuth()
-    const levelCodes                = useSettingCodes('100001', token)
+    const levelCodes                = useSettingCodes('100001')
 
     const getLevelName = (code) => {
         const found = levelCodes.find(opt => opt.code === code)
@@ -56,10 +55,7 @@ function AdminList() {
     const fetchList = async (params = filter) => {
         setLoading(true)
         try {
-            const res = await api.get('/admin/managers', {
-                params,
-                headers: { Authorization: `Bearer ${token}` }
-            })
+            const res = await api.get('/admin/managers', { params });
             setList(res.data.data.list)
             setTotal(res.data.data.total)
             setLastPage(res.data.data.last_page)

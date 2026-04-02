@@ -32,7 +32,7 @@ class JwtFilter implements FilterInterface
         }
 
         // 다음 컨트롤러에서 사용할 수 있도록 저장
-        $request->user = $decoded;
+//        $request->withAttribute('user', $decoded);
     }
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
