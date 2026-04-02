@@ -23,6 +23,7 @@ import BoardList        from './pages/admin/boards/BoardList'
 import BoardForm        from './pages/admin/boards/BoardForm'
 import PostList         from './pages/admin/boards/PostList'
 import PostForm         from './pages/admin/boards/PostForm'
+import PostView         from './pages/admin/boards/PostView'
 
 // 일반 사용자 라우트 배열
 const publicRoutes = [
@@ -43,6 +44,7 @@ const adminRoutes = [
     { path: 'boards/:boardCode/posts', element: <PostList /> },
     { path: 'boards/:boardCode/posts/create', element: <PostForm /> },
     { path: 'boards/:boardCode/posts/:id', element: <PostForm /> },
+    { path: 'boards/:boardCode/posts/:id/view', element: <PostView /> },
 ]
 
 function App() {

@@ -184,7 +184,7 @@ function PostList() {
                                     </td>
                                     <td className="px-4 py-3">
                                             <span
-                                                onClick={() => navigate(`/admin/boards/${boardCode}/posts/${item.id}`)}
+                                                onClick={() => navigate(`/admin/boards/${boardCode}/posts/${item.id}/view`)}
                                                 className="cursor-pointer hover:text-orange-500 font-medium"
                                             >
                                                 {item.title}
