@@ -1,22 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { Editor } from '@toast-ui/react-editor'
+import '@toast-ui/editor/dist/toastui-editor.css'
 import api from '@/api/axios'
 import * as FC from '@/components/admin/FormComponents'
 import PageHeader from '@/components/admin/PageHeader'
 import { showAlert, showConfirm } from '@/utils/modal'
+import { FaTrash, FaFile } from 'react-icons/fa6'
 
 function PostForm() {
     const navigate          = useNavigate()
     const { boardCode, id } = useParams()
     const isEdit            = !!id
+    const editorRef         = useRef(null)
+    const fileInputRef      = useRef(null)
 
     const [board, setBoard]             = useState(null)
     const [loading, setLoading]         = useState(false)
     const [pageLoading, setPageLoading] = useState(true)
+    const [files, setFiles]             = useState([])       // 업로드된 파일 목록
+    const [uploading, setUploading]     = useState(false)    // 파일 업로드 중
 
     const [form, setForm] = useState({
         title          : '',
-        content        : '',
         is_notice      : '0',
         is_secret      : '0',
         is_main        : '0',
@@ -41,7 +47,6 @@ function PostForm() {
                     const post = res.data.data.post
                     setForm({
                         title          : post.title          ?? '',
-                        content        : post.content        ?? '',
                         is_notice      : post.is_notice      ?? '0',
                         is_secret      : post.is_secret      ?? '0',
                         is_main        : post.is_main        ?? '0',
@@ -51,8 +56,10 @@ function PostForm() {
                         event_start_at : post.event_start_at ?? '',
                         event_end_at   : post.event_end_at   ?? '',
                     })
+                    setTimeout(() => {
+                        editorRef.current?.getInstance().setHTML(post.content ?? '')
+                    }, 100)
                 } else {
-                    // 등록 시 게시판 정보만 가져오기
                     const res = await api.get(`/admin/boards/${boardCode}/posts`, { params: { per_page: 1 } })
                     setBoard(res.data.data.board)
                 }
@@ -65,31 +72,87 @@ function PostForm() {
         fetchData()
     }, [boardCode, id])
 
+    // 파일 업로드
+    const handleFileChange = async (e) => {
+        const selectedFiles = Array.from(e.target.files)
+        if (!selectedFiles.length) return
+
+        // 파일 개수 체크
+        const maxCount = parseInt(board?.file_count ?? 10)
+        if (files.length + selectedFiles.length > maxCount) {
+            showAlert('warning', '파일 초과', `파일은 최대 ${maxCount}개까지 첨부 가능합니다.`)
+            return
+        }
+
+        // 파일 크기 체크
+        const maxSize  = parseInt(board?.file_size ?? 10) * 1024 * 1024
+        for (const file of selectedFiles) {
+            if (file.size > maxSize) {
+                showAlert('warning', '파일 크기 초과', `파일 크기는 최대 ${board?.file_size ?? 10}MB까지 가능합니다.`)
+                return
+            }
+        }
+
+        setUploading(true)
+        try {
+            const formData = new FormData()
+            selectedFiles.forEach(file => formData.append('files[]', file))
+
+            const res = await api.post(`/admin/boards/${boardCode}/files`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            })
+
+            setFiles(prev => [...prev, ...res.data.data])
+        } catch (err) {
+            showAlert('error', '오류', '파일 업로드 실패')
+        } finally {
+            setUploading(false)
+            fileInputRef.current.value = ''
+        }
+    }
+
+    // 파일 삭제
+    const handleFileDelete = async (index, savedName) => {
+        try {
+            await api.delete(`/admin/boards/${boardCode}/files/${savedName}`)
+            setFiles(prev => prev.filter((_, i) => i !== index))
+        } catch (err) {
+            showAlert('error', '오류', '파일 삭제 실패')
+        }
+    }
+
+    // 파일 크기 포맷
+    const formatFileSize = (bytes) => {
+        if (bytes < 1024)        return bytes + ' B'
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+    }
+
     // 저장
     const handleSubmit = async () => {
-        if (!form.title)   return showAlert('warning', '입력 오류', '제목을 입력해 주세요.')
-        if (!form.content) return showAlert('warning', '입력 오류', '내용을 입력해 주세요.')
+        if (!form.title) return showAlert('warning', '입력 오류', '제목을 입력해 주세요.')
+
+        const content = editorRef.current?.getInstance().getHTML()
+        if (!content || content === '<p><br></p>') return showAlert('warning', '입력 오류', '내용을 입력해 주세요.')
 
         setLoading(true)
         try {
+            const payload = { ...form, content, files }
+
             if (isEdit) {
-                await api.put(`/admin/boards/${boardCode}/posts/${id}`, form)
+                await api.put(`/admin/boards/${boardCode}/posts/${id}`, payload)
                 showAlert('success', '수정 완료', '수정되었습니다.', () => {
                     navigate(`/admin/boards/${boardCode}/posts`)
                 })
             } else {
-                await api.post(`/admin/boards/${boardCode}/posts`, form)
+                await api.post(`/admin/boards/${boardCode}/posts`, payload)
                 showAlert('success', '등록 완료', '등록되었습니다.', () => {
                     navigate(`/admin/boards/${boardCode}/posts`)
                 })
             }
         } catch (err) {
             const msg = err.response?.data?.message
-            if (typeof msg === 'object') {
-                showAlert('error', '오류', Object.values(msg)[0])
-            } else {
-                showAlert('error', '오류', msg || '저장 실패')
-            }
+            showAlert('error', '오류', typeof msg === 'object' ? Object.values(msg)[0] : msg || '저장 실패')
         } finally {
             setLoading(false)
         }
@@ -118,8 +181,8 @@ function PostForm() {
             <PageHeader
                 title={isEdit ? '게시글 수정' : '게시글 작성'}
                 breadcrumbs={[
-                    { label: '게시판 관리',              path: '/admin/boards' },
-                    { label: board?.board_name ?? '',    path: `/admin/boards/${boardCode}/posts` },
+                    { label: '게시판 관리',           path: '/admin/boards' },
+                    { label: board?.board_name ?? '', path: `/admin/boards/${boardCode}/posts` },
                     { label: isEdit ? '게시글 수정' : '게시글 작성' },
                 ]}
                 actions={
@@ -149,14 +212,22 @@ function PostForm() {
                 }
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg shadow">
 
-                {/* ===== 본문 ===== */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow p-4">
-                    <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-3">게시글 내용</h2>
+                {/* 게시판 */}
+                <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                    <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1">게시판</div>
+                    <div className="flex-1 py-1 text-sm text-gray-700 font-medium">
+                        {board?.board_name} <span className="text-gray-400">({boardCode})</span>
+                    </div>
+                </div>
 
-                    {/* 제목 */}
-                    <FC.Row label="제목" required>
+                {/* 제목 */}
+                <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                    <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">
+                        <span className="text-red-500 mr-1">*</span>제목
+                    </div>
+                    <div className="flex-1">
                         <input
                             type="text"
                             name="title"
@@ -165,129 +236,159 @@ function PostForm() {
                             onChange={handleChange}
                             className={FC.inputClass}
                         />
-                    </FC.Row>
-
-                    {/* 내용 */}
-                    <FC.Row label="내용" required>
-                        <textarea
-                            name="content"
-                            placeholder="내용을 입력해 주세요"
-                            value={form.content}
-                            onChange={handleChange}
-                            rows={15}
-                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400 resize-y"
-                        />
-                    </FC.Row>
-
-                    {/* 이벤트형일 때만 표시 */}
-                    {board?.skin_type === 'event' && (
-                        <>
-                            <FC.Row label="이벤트 시작일">
-                                <input
-                                    type="datetime-local"
-                                    name="event_start_at"
-                                    value={form.event_start_at}
-                                    onChange={handleChange}
-                                    className={FC.inputClass}
-                                />
-                            </FC.Row>
-                            <FC.Row label="이벤트 종료일">
-                                <input
-                                    type="datetime-local"
-                                    name="event_end_at"
-                                    value={form.event_end_at}
-                                    onChange={handleChange}
-                                    className={FC.inputClass}
-                                />
-                            </FC.Row>
-                        </>
-                    )}
-                </div>
-
-                {/* ===== 설정 ===== */}
-                <div className="flex flex-col gap-4">
-                    <div className="bg-white rounded-lg shadow p-4">
-                        <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-3">게시글 설정</h2>
-
-                        {/* 공지여부 */}
-                        <FC.Row label="공지여부">
-                            <div className="flex items-center gap-4 pt-1.5">
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="radio" name="is_notice" value="1" checked={form.is_notice === '1'} onChange={handleChange} className="accent-orange-500" />
-                                    공지
-                                </label>
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="radio" name="is_notice" value="0" checked={form.is_notice === '0'} onChange={handleChange} className="accent-orange-500" />
-                                    일반
-                                </label>
-                            </div>
-                        </FC.Row>
-
-                        {/* 비밀글 */}
-                        {board?.use_secret === '1' && (
-                            <FC.Row label="비밀글">
-                                <div className="flex items-center gap-4 pt-1.5">
-                                    <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                        <input type="radio" name="is_secret" value="1" checked={form.is_secret === '1'} onChange={handleChange} className="accent-orange-500" />
-                                        비밀
-                                    </label>
-                                    <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                        <input type="radio" name="is_secret" value="0" checked={form.is_secret === '0'} onChange={handleChange} className="accent-orange-500" />
-                                        공개
-                                    </label>
-                                </div>
-                            </FC.Row>
-                        )}
-
-                        {/* 메인 노출 */}
-                        <FC.Row label="메인노출">
-                            <div className="flex items-center gap-4 pt-1.5">
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="radio" name="is_main" value="1" checked={form.is_main === '1'} onChange={handleChange} className="accent-orange-500" />
-                                    노출
-                                </label>
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="radio" name="is_main" value="0" checked={form.is_main === '0'} onChange={handleChange} className="accent-orange-500" />
-                                    미노출
-                                </label>
-                            </div>
-                        </FC.Row>
-
-                        {/* 사용여부 */}
-                        <FC.Row label="사용여부">
-                            <div className="flex items-center gap-4 pt-1.5">
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="radio" name="is_use" value="1" checked={form.is_use === '1'} onChange={handleChange} className="accent-orange-500" />
-                                    사용
-                                </label>
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                    <input type="radio" name="is_use" value="0" checked={form.is_use === '0'} onChange={handleChange} className="accent-orange-500" />
-                                    미사용
-                                </label>
-                            </div>
-                        </FC.Row>
-
-                        {/* 1:1문의형일 때 상태 */}
-                        {board?.skin_type === 'qna' && (
-                            <FC.Row label="답변상태">
-                                <select name="status" value={form.status} onChange={handleChange} className={FC.selectClass + ' w-full'}>
-                                    <option value="pending">답변대기</option>
-                                    <option value="answered">답변완료</option>
-                                </select>
-                            </FC.Row>
-                        )}
                     </div>
-
-                    {/* 작성자 정보 (수정 시) */}
-                    {isEdit && (
-                        <div className="bg-white rounded-lg shadow p-4">
-                            <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-3">작성자 정보</h2>
-                            <FC.Row label="작성일">
-                                <span className="text-sm text-gray-500">{form.created_at?.slice(0, 10)}</span>
-                            </FC.Row>
-                        </div>
-                    )}
                 </div>
+
+                {/* 파일 첨부 */}
+                {board?.use_file === '1' && (
+                    <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                        <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">파일첨부</div>
+                        <div className="flex-1">
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={uploading}
+                                className="flex items-center gap-2 border border-gray-300 text-sm px-3 py-1.5 rounded hover:bg-gray-50 disabled:opacity-50"
+                            >
+                                <FaFile size={12} />
+                                {uploading ? '업로드 중...' : '파일 찾기'}
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                multiple
+                                className="hidden"
+                                onChange={handleFileChange}
+                            />
+                            <div className="mt-2 text-xs text-gray-400 flex flex-col gap-0.5">
+                                <span>파일은 최대 {board?.file_count ?? 10}개까지 다중업로드가 가능합니다.</span>
+                                <span>파일 업로드 최대 사이즈는 {board?.file_size ?? 10}MB 입니다.</span>
+                            </div>
+
+                            {/* 첨부된 파일 목록 */}
+                            {files.length > 0 && (
+                                <div className="mt-3 flex flex-col gap-1.5">
+                                    {files.map((file, index) => (
+                                        <div key={index} className="flex items-center gap-2 bg-gray-50 rounded px-3 py-2 text-sm">
+                                            <FaFile size={12} className="text-gray-400 shrink-0" />
+                                            <span className="flex-1 text-gray-700">{file.original_name}</span>
+                                            <span className="text-gray-400 text-xs">{formatFileSize(file.file_size)}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => handleFileDelete(index, file.saved_name)}
+                                                className="text-gray-400 hover:text-red-500"
+                                            >
+                                                <FaTrash size={11} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* 게시글 옵션 */}
+                <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                    <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">게시글 옵션 설정</div>
+                    <div className="flex-1 flex items-center gap-5 pt-1.5">
+                        <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={form.is_notice === '1'}
+                                onChange={(e) => setForm({ ...form, is_notice: e.target.checked ? '1' : '0' })}
+                                className="accent-orange-500 w-4 h-4"
+                            />
+                            공지사항
+                        </label>
+                        {board?.use_secret === '1' && (
+                            <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={form.is_secret === '1'}
+                                    onChange={(e) => setForm({ ...form, is_secret: e.target.checked ? '1' : '0' })}
+                                    className="accent-orange-500 w-4 h-4"
+                                />
+                                비밀글
+                            </label>
+                        )}
+                        <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={form.is_main === '1'}
+                                onChange={(e) => setForm({ ...form, is_main: e.target.checked ? '1' : '0' })}
+                                className="accent-orange-500 w-4 h-4"
+                            />
+                            메인 노출
+                        </label>
+                    </div>
+                </div>
+
+                {/* 이벤트형 날짜 */}
+                {board?.skin_type === 'event' && (
+                    <>
+                        <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                            <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">이벤트 시작일</div>
+                            <div className="flex-1">
+                                <input type="datetime-local" name="event_start_at" value={form.event_start_at} onChange={handleChange} className={FC.inputClass} />
+                            </div>
+                        </div>
+                        <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                            <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">이벤트 종료일</div>
+                            <div className="flex-1">
+                                <input type="datetime-local" name="event_end_at" value={form.event_end_at} onChange={handleChange} className={FC.inputClass} />
+                            </div>
+                        </div>
+                    </>
+                )}
+
+                {/* 1:1문의 상태 */}
+                {board?.skin_type === 'qna' && (
+                    <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                        <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">답변상태</div>
+                        <div className="flex-1">
+                            <select name="status" value={form.status} onChange={handleChange} className={FC.selectClass}>
+                                <option value="pending">답변대기</option>
+                                <option value="answered">답변완료</option>
+                            </select>
+                        </div>
+                    </div>
+                )}
+
+                {/* 에디터 */}
+                <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                    <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">
+                        <span className="text-red-500 mr-1">*</span>내용
+                    </div>
+                    <div className="flex-1">
+                        <Editor
+                            ref={editorRef}
+                            initialValue=" "
+                            previewStyle="vertical"
+                            height="500px"
+                            initialEditType="wysiwyg"
+                            useCommandShortcut={true}
+                            placeholder="내용을 입력하세요."
+                            language="ko-KR"
+                        />
+                    </div>
+                </div>
+
+                {/* 사용여부 */}
+                <div className="flex items-start px-4 py-3">
+                    <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">사용여부</div>
+                    <div className="flex items-center gap-4 pt-1.5">
+                        <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                            <input type="radio" name="is_use" value="1" checked={form.is_use === '1'} onChange={handleChange} className="accent-orange-500" />
+                            사용
+                        </label>
+                        <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                            <input type="radio" name="is_use" value="0" checked={form.is_use === '0'} onChange={handleChange} className="accent-orange-500" />
+                            미사용
+                        </label>
+                    </div>
+                </div>
+
             </div>
         </div>
     )

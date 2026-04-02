@@ -56,6 +56,8 @@ $routes->group('api', function($routes) {
                 $routes->get('posts/(:num)',   'Api\Admin\Board\PostController::show/$1/$2');
                 $routes->put('posts/(:num)',   'Api\Admin\Board\PostController::update/$1/$2');
                 $routes->delete('posts/(:num)', 'Api\Admin\Board\PostController::delete/$1/$2');
+                $routes->post('boards/(:alpha)/files',              'Api\Admin\Board\FileController::upload/$1');
+                $routes->delete('boards/(:alpha)/files/(:segment)', 'Api\Admin\Board\FileController::delete/$1/$2');
             });
 
             // 설정
