@@ -19,6 +19,8 @@ $routes->group('api', function($routes) {
     // ===== 관리자 =====
     $routes->group('admin', function($routes) {
 
+        $routes->get('me', 'Api\Admin\AdminAuthController::me');
+
         // 관리자 인증 (JWT 없음)
         $routes->group('auth', function($routes) {
             $routes->post('register', 'Api\Admin\AdminAuthController::register'); // 승인대기 고정

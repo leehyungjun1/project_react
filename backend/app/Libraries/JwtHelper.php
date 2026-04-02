@@ -34,4 +34,10 @@ class JwtHelper
             return null;
         }
     }
+
+    public static function decodeToken(string $token): ?array
+    {
+        $decoded = self::validateToken($token);
+        return $decoded ? (array) $decoded : null;
+    }
 }
