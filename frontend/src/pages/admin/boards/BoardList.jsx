@@ -121,49 +121,55 @@ function BoardList() {
             />
 
             {/* ===== 검색 필터 ===== */}
-            <div className="bg-white rounded-lg shadow p-4 mb-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-
-                    {/* 스킨 */}
-                    <div>
-                        <label className="block text-xs text-gray-500 mb-1">스킨</label>
-                        <select name="skin_type" value={filter.skin_type} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-                            <option value="">전체</option>
-                            <option value="normal">일반형</option>
-                            <option value="gallery">갤러리형</option>
-                            <option value="qna">1:1문의형</option>
-                            <option value="event">이벤트형</option>
-                        </select>
-                    </div>
-
-                    {/* 사용여부 */}
-                    <div>
-                        <label className="block text-xs text-gray-500 mb-1">사용여부</label>
-                        <select name="is_active" value={filter.is_active} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
-                            <option value="">전체</option>
-                            <option value="1">사용</option>
-                            <option value="0">미사용</option>
-                        </select>
+            <div className="bg-white rounded-lg shadow p-4 mb-4 space-y-4">
+                <div className="flex flex-col lg:flex-row lg:items-end gap-2">
+                    {/* 키워드 검색 */}
+                    <div className="flex items-center gap-2 w-full">
+                        <input
+                            type="text"
+                            name="keyword"
+                            placeholder="게시판명 또는 코드 검색"
+                            value={filter.keyword}
+                            onChange={handleFilterChange}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                        />
+                        <button onClick={handleSearch} className="shrink-0 bg-orange-500 text-white text-sm px-4 py-1.5 rounded hover:bg-orange-600">
+                            검색
+                        </button>
+                        <button onClick={handleReset} className="shrink-0 bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded hover:bg-gray-300">
+                            초기화
+                        </button>
                     </div>
                 </div>
 
-                {/* 키워드 검색 */}
-                <div className="flex gap-2">
-                    <input
-                        type="text"
-                        name="keyword"
-                        placeholder="게시판명 또는 코드 검색"
-                        value={filter.keyword}
-                        onChange={handleFilterChange}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
-                    />
-                    <button onClick={handleSearch} className="shrink-0 bg-orange-500 text-white text-sm px-4 py-1.5 rounded hover:bg-orange-600">
-                        검색
-                    </button>
-                    <button onClick={handleReset} className="shrink-0 bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded hover:bg-gray-300">
-                        초기화
-                    </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* 좌측 */}
+                    <div className="space-y-3">
+                        {/* 스킨 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">스킨</label>
+                            <select name="skin_type" value={filter.skin_type} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+                                <option value="">전체</option>
+                                <option value="normal">일반형</option>
+                                <option value="gallery">갤러리형</option>
+                                <option value="qna">1:1문의형</option>
+                                <option value="event">이벤트형</option>
+                            </select>
+                        </div>
+                    </div>
+                    {/* 우측 */}
+                    <div className="space-y-3">
+                        {/* 사용여부 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">사용여부</label>
+                            <select name="is_active" value={filter.is_active} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+                                <option value="">전체</option>
+                                <option value="1">사용</option>
+                                <option value="0">미사용</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
 

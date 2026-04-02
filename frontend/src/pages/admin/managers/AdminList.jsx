@@ -47,6 +47,9 @@ function AdminList() {
         is_active   : '',
         admin_level : '',
         emp_type    : '',
+        start_date  : '',
+        end_date    : '',
+        date_type   : 'created_at',
         page        : 1,
         per_page    : 20,
     })
@@ -149,76 +152,152 @@ function AdminList() {
             />
 
             {/* ===== 검색 필터 ===== */}
-            <div className="bg-white rounded-lg shadow p-4 mb-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+            <div className="bg-white rounded-lg shadow p-4 mb-4 space-y-4">
 
-                    {/* 상태 */}
+                {/* ===== 2단 영역 ===== */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* 좌측 */}
+                    <div className="space-y-3">
+                        {/* 검색어 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">검색어</label>
+                            <div className="flex gap-2">
+                                <select
+                                    name="search_type"
+                                    value={filter.search_type}
+                                    onChange={handleFilterChange}
+                                    className={FC.selectClass}
+                                >
+                                    <option value="name">이름</option>
+                                    <option value="admin_id">아이디</option>
+                                    <option value="email">이메일</option>
+                                    <option value="mobile">휴대폰</option>
+                                </select>
+
+                                <input
+                                    type="text"
+                                    name="keyword"
+                                    placeholder="검색어 입력"
+                                    value={filter.keyword}
+                                    onChange={handleFilterChange}
+                                    className={FC.inputClass}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 직원여부 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">직원여부</label>
+                            <select
+                                name="emp_type"
+                                value={filter.emp_type}
+                                onChange={handleFilterChange}
+                                className={FC.selectClass + ' w-full'}
+                            >
+                                <option value="">전체</option>
+                                <option value="1001">직원</option>
+                                <option value="1002">비정규직</option>
+                                <option value="1003">아르바이트</option>
+                                <option value="1004">파견직</option>
+                                <option value="1005">퇴사자</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* 우측 */}
+                    <div className="space-y-3">
+                        {/* 상태 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">상태</label>
+                            <select
+                                name="is_active"
+                                value={filter.is_active}
+                                onChange={handleFilterChange}
+                                className={FC.selectClass + ' w-full'}
+                            >
+                                <option value="">전체</option>
+                                <option value="1001">승인대기</option>
+                                <option value="1002">재직중</option>
+                                <option value="1003">휴가중</option>
+                                <option value="1004">퇴직</option>
+                            </select>
+                        </div>
+
+                        {/* 레벨 + 텍스트 검색 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">관리자 레벨</label>
+                            <select
+                                name="admin_level"
+                                value={filter.admin_level}
+                                onChange={handleFilterChange}
+                                className={FC.selectClass + ' w-full'}
+                            >
+                                <option value="">전체</option>
+                                {levelCodes.map(opt => (
+                                    <option key={opt.id} value={opt.code}>
+                                        {opt.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* ===== 기간 (무조건 1줄) ===== */}
+                <div className="flex flex-col lg:flex-row lg:items-end gap-2">
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">상태</label>
-                        <select name="is_active" value={filter.is_active} onChange={handleFilterChange} className={FC.selectClass + ' w-full'}>
-                            <option value="">전체</option>
-                            <option value="1001">승인대기</option>
-                            <option value="1002">재직중</option>
-                            <option value="1003">휴가중</option>
-                            <option value="1004">퇴직</option>
+                        <label className="block text-xs text-gray-500 mb-1">기간</label>
+                        <select
+                            name="date_type"
+                            value={filter.date_type}
+                            onChange={handleFilterChange}
+                            className={FC.selectClass}
+                        >
+                            <option value="created_at">가입일</option>
+                            <option value="last_login_at">최근 로그인</option>
                         </select>
                     </div>
 
-                    {/* 레벨 */}
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">관리자 레벨</label>
-                        <select name="admin_level" value={filter.admin_level} onChange={handleFilterChange} className={FC.selectClass + ' w-full'}>
-                            <option value="">전체</option>
-                            {levelCodes.map(opt => (
-                                <option key={opt.id} value={opt.code}>{opt.name}</option>
-                            ))}
-                        </select>
+                        <label className="block text-xs text-gray-500 mb-1">시작일</label>
+                        <input
+                            type="date"
+                            name="start_date"
+                            value={filter.start_date}
+                            onChange={handleFilterChange}
+                            className={FC.inputClass}
+                        />
                     </div>
 
-                    {/* 직원여부 */}
                     <div>
-                        <label className="block text-xs text-gray-500 mb-1">직원여부</label>
-                        <select name="emp_type" value={filter.emp_type} onChange={handleFilterChange} className={FC.selectClass + ' w-full'}>
-                            <option value="">전체</option>
-                            <option value="1001">직원</option>
-                            <option value="1002">비정규직</option>
-                            <option value="1003">아르바이트</option>
-                            <option value="1004">파견직</option>
-                            <option value="1005">퇴사자</option>
-                        </select>
+                        <label className="block text-xs text-gray-500 mb-1">종료일</label>
+                        <input
+                            type="date"
+                            name="end_date"
+                            value={filter.end_date}
+                            onChange={handleFilterChange}
+                            className={FC.inputClass}
+                        />
+                    </div>
+
+                    {/* 버튼 */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleSearch}
+                            className="bg-orange-500 text-white text-sm px-4 py-1.5 rounded hover:bg-orange-600"
+                        >
+                            검색
+                        </button>
+                        <button
+                            onClick={handleReset}
+                            className="bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded hover:bg-gray-300"
+                        >
+                            초기화
+                        </button>
                     </div>
                 </div>
 
-                {/* 키워드 검색 */}
-                <div className="flex gap-2">
-                    <select name="search_type" value={filter.search_type} onChange={handleFilterChange} className={FC.selectClass}>
-                        <option value="name">이름</option>
-                        <option value="admin_id">아이디</option>
-                        <option value="email">이메일</option>
-                        <option value="mobile">휴대폰</option>
-                    </select>
-                    <input
-                        type="text"
-                        name="keyword"
-                        placeholder="검색어 입력"
-                        value={filter.keyword}
-                        onChange={handleFilterChange}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        className={FC.inputClass}
-                    />
-                    <button
-                        onClick={handleSearch}
-                        className="shrink-0 bg-orange-500 text-white text-sm px-4 py-1.5 rounded hover:bg-orange-600"
-                    >
-                        검색
-                    </button>
-                    <button
-                        onClick={handleReset}
-                        className="shrink-0 bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded hover:bg-gray-300"
-                    >
-                        초기화
-                    </button>
-                </div>
             </div>
 
             {/* ===== 목록 ===== */}
