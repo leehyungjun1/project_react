@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Editor } from '@toast-ui/react-editor'
 import '@toast-ui/editor/dist/toastui-editor.css'
 import api from '@/api/axios'
@@ -10,7 +10,8 @@ import { FaTrash, FaFile } from 'react-icons/fa6'
 
 function PostForm() {
     const navigate          = useNavigate()
-    const { boardCode, id } = useParams()
+    const { boardCode, id }   = useParams()
+    const [searchParams]    = useSearchParams()
     const isEdit                  = !!id
     const editorRef         = useRef(null)
     const fileInputRef      = useRef(null)
@@ -24,6 +25,7 @@ function PostForm() {
 
     const [form, setForm] = useState({
         title          : '',
+        parent_id      : '',
         is_notice      : '0',
         is_secret      : '0',
         is_main        : '0',
@@ -57,12 +59,57 @@ function PostForm() {
                         event_start_at : post.event_start_at ?? '',
                         event_end_at   : post.event_end_at   ?? '',
                     })
+
+                    // ✅ setTimeout으로 감싸기
                     setTimeout(() => {
-                        editorRef.current?.getInstance().setHTML(post.content ?? '')
+                        const instance = editorRef.current?.getInstance()
+                        if (instance) {
+                            instance.setHTML(post.content ?? '')
+                        }
                     }, 100)
+
                 } else {
                     const res = await api.get(`/admin/boards/${boardCode}/posts`, { params: { per_page: 1 } })
                     setBoard(res.data.data.board)
+
+                    const parentId = searchParams.get('parent_id')
+                    if (parentId) {
+                        const parentRes  = await api.get(`/admin/boards/${boardCode}/posts/${parentId}`)
+                        const parentPost = parentRes.data.data.post
+
+                        setForm(prev => ({
+                            ...prev,
+                            parent_id : parentId,
+                            title     : `RE: ${parentPost.title}`,
+                        }))
+
+                        // ✅ setTimeout으로 감싸기
+                        setTimeout(() => {
+                            const instance = editorRef.current?.getInstance()
+                            if (instance) {
+                                const originalContent = `
+                            <p><br></p><p><br></p>
+                            <hr>
+                            <p style="color:#888; font-size:12px;">원본글 - ${parentPost.writer} (${parentPost.created_at?.slice(0, 16)})</p>
+                            <div style="color:#888; font-size:12px;">${parentPost.content ?? ''}</div>
+                        `
+                                instance.setHTML(originalContent)
+
+                                // ✅ 커서 + 스크롤 맨 위로
+                                setTimeout(() => {
+                                    const editorEl = document.querySelector('[contenteditable=true]')
+                                    if (editorEl) {
+                                        editorEl.focus()
+                                        document.execCommand('selectAll', false, null)
+                                        document.getSelection()?.collapseToStart()
+                                        editorEl.scrollTop = 0
+                                    }
+                                    const editorWrapper = document.querySelector('.toastui-editor-ww-container')
+                                    if (editorWrapper) editorWrapper.scrollTop = 0
+                                }, 200)
+                            }
+                        }, 100)
+                    }
                 }
             } catch (err) {
                 showAlert('error', '오류', '데이터를 불러오는데 실패했습니다.')
@@ -324,14 +371,16 @@ function PostForm() {
                 <div className="flex items-start border-b border-gray-100 px-4 py-3">
                     <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">게시글 옵션 설정</div>
                     <div className="flex-1 flex items-center gap-5 pt-1.5">
-                        <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                        <label className={`flex items-center gap-1.5 text-sm ${form.parent_id ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
                             <input
                                 type="checkbox"
                                 checked={form.is_notice === '1'}
                                 onChange={(e) => setForm({ ...form, is_notice: e.target.checked ? '1' : '0' })}
+                                disabled={!!form.parent_id}  // ✅ 답글이면 비활성화
                                 className="accent-orange-500 w-4 h-4"
                             />
                             공지사항
+                            {form.parent_id && <span className="text-xs text-gray-400">(답글 불가)</span>}
                         </label>
                         {board?.use_secret === '1' && (
                             <label className="flex items-center gap-1.5 text-sm cursor-pointer">
@@ -400,8 +449,9 @@ function PostForm() {
                             height="500px"
                             initialEditType="wysiwyg"
                             useCommandShortcut={true}
-                            placeholder="내용을 입력하세요."
                             language="ko-KR"
+                            autofocus={false}
+                            usageStatistics={false}
                         />
                     </div>
                 </div>

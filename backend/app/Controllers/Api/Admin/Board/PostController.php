@@ -56,7 +56,8 @@ class PostController extends ResourceController
 
         $total = $postModel->countAllResults(false);
         $list  = $postModel->orderBy('is_notice', 'DESC')
-            ->orderBy('id', 'DESC')
+            ->orderBy('group_id', 'DESC')
+            ->orderBy('order_no', 'ASC')
             ->findAll($perPage, ($page - 1) * $perPage);
 
         return $this->respond([
@@ -132,43 +133,114 @@ class PostController extends ResourceController
         }
 
         $postModel = new DynamicBoardModel($boardCode);
+        $db        = \Config\Database::connect();
 
-        // JWT에서 관리자 정보 가져오기
         $decoded = \App\Libraries\JwtHelper::decodeToken(
             str_replace('Bearer ', '', $this->request->getHeaderLine('Authorization'))
         );
 
-        $postId = $postModel->insert([
-            'board_id'    => $board['id'],
-            'writer_type' => 'admin',
-            'writer_id'   => $decoded?->id ?? null,
-            'writer'      => $decoded?->name ?? '관리자',
-            'title'       => $json['title'],
-            'content'     => $json['content'],
-            'is_notice'   => $json['is_notice']  ?? 0,
-            'is_secret'   => $json['is_secret']  ?? 0,
-            'is_main'     => $json['is_main']     ?? 0,
-            'is_use'      => $json['is_use']      ?? 1,
-            'status'      => $json['status']      ?? 'normal',
-            'category_id' => $json['category_id'] ?? null,
-            'thumbnail'      => $json['thumbnail']       ?? null,
-            'event_start_at' => $json['event_start_at'] ?? null,
-            'event_end_at'   => $json['event_end_at']   ?? null,
-            'ip'          => $this->request->getIPAddress(),
-        ], true);
+        $parentId = $json['parent_id'] ?? null;
 
-        // 답글인 경우 group_id, parent_id 설정
-        if (!empty($json['parent_id'])) {
-            $parent = $postModel->find($json['parent_id']);
-            $postModel->update($postId, [
-                'group_id'  => $parent['group_id'] ?? $json['parent_id'],
-                'parent_id' => $json['parent_id'],
-                'depth'     => ($parent['depth'] ?? 0) + 1,
-                'order_no'  => ($parent['order_no'] ?? 0) + 1,
-            ]);
+        if ($parentId) {
+            // ===== 답글 =====
+            $parent  = $postModel->find($parentId);
+
+            if (!$parent) {
+                return $this->respond([
+                    'status'  => false,
+                    'message' => '원글을 찾을 수 없습니다.',
+                ], ResponseInterface::HTTP_NOT_FOUND);
+            }
+
+            $groupId = $parent['group_id'];
+            $depth   = $parent['depth'] + 1;
+
+            // ✅ 같은 parent_id 자식 중 마지막 order_no 찾기
+            $lastChild = $db->table("board_{$boardCode}")
+                ->where('group_id', $groupId)
+                ->where('parent_id', $parentId)
+                ->where('deleted_at IS NULL', null, false)
+                ->orderBy('order_no', 'DESC')
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+
+            if ($lastChild) {
+                // 마지막 자식의 하위 트리 끝 order_no 찾기
+                $lastOrderNo = $db->table("board_{$boardCode}")
+                    ->where('group_id', $groupId)
+                    ->where('order_no >=', $lastChild['order_no'])
+                    ->where('deleted_at IS NULL', null, false)
+                    ->orderBy('order_no', 'DESC')
+                    ->limit(1)
+                    ->get()
+                    ->getRowArray()['order_no'] ?? $lastChild['order_no'];
+            } else {
+                // 자식 없으면 parent order_no 기준
+                $lastOrderNo = $parent['order_no'];
+            }
+
+            $newOrderNo = $lastOrderNo + 1;
+
+            // 새 답글 위치 이후 order_no 모두 +1
+            $db->query(
+                "UPDATE board_{$boardCode} SET order_no = order_no + 1 WHERE group_id = ? AND order_no >= ?",
+                [$groupId, $newOrderNo]
+            );
+
+            $postId = $postModel->insert([
+                'board_id'    => $board['id'],
+                'group_id'    => $groupId,
+                'parent_id'   => $parentId,
+                'depth'       => $depth,
+                'order_no'    => $newOrderNo,
+                'writer_type' => 'admin',
+                'writer_id'   => $decoded?->id ?? null,
+                'writer'      => $decoded?->name ?? '관리자',
+                'title'       => $json['title'],
+                'content'     => $json['content'],
+                'is_notice'   => 0,
+                'is_secret'   => $json['is_secret'] ?? 0,
+                'is_main'     => 0,
+                'is_use'      => $json['is_use']     ?? 1,
+                'status'      => 'normal',
+                'thumbnail'   => null,
+                'ip'          => $this->request->getIPAddress(),
+            ], true);
+
+            // 원글 comment_count 증가
+            $db->query(
+                "UPDATE board_{$boardCode} SET comment_count = comment_count + 1 WHERE id = ?",
+                [$groupId]
+            );
+
         } else {
-            // 원글이면 group_id = 자신의 id
-            $postModel->update($postId, ['group_id' => $postId]);
+            // ===== 원글 =====
+            $postId = $postModel->insert([
+                'board_id'    => $board['id'],
+                'writer_type' => 'admin',
+                'writer_id'   => $decoded?->id ?? null,
+                'writer'      => $decoded?->name ?? '관리자',
+                'title'       => $json['title'],
+                'content'     => $json['content'],
+                'is_notice'   => $json['is_notice']      ?? 0,
+                'is_secret'   => $json['is_secret']      ?? 0,
+                'is_main'     => $json['is_main']         ?? 0,
+                'is_use'      => $json['is_use']          ?? 1,
+                'status'      => $json['status']          ?? 'normal',
+                'category_id' => $json['category_id']     ?? null,
+                'thumbnail'   => $json['thumbnail']       ?? null,
+                'event_start_at' => $json['event_start_at'] ?? null,
+                'event_end_at'   => $json['event_end_at']   ?? null,
+                'ip'          => $this->request->getIPAddress(),
+            ], true);
+
+            // group_id = 자신의 id, order_no = 0
+            $postModel->update($postId, [
+                'group_id' => $postId,
+                'order_no' => 0,
+                'depth'    => 0,
+            ]);
         }
 
         return $this->respond([

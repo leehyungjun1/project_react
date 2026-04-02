@@ -21,6 +21,7 @@ function PostView() {
             const res = await api.get(`/admin/boards/${boardCode}/posts/${id}`)
             setBoard(res.data.data.board)
             setPost(res.data.data.post)
+            console.log('post status:', res.data.data.post.status)
 
             if (res.data.data.board?.skin_type === 'qna') {
                 const replyRes = await api.get(`/admin/boards/${boardCode}/posts`, {
@@ -137,6 +138,12 @@ function PostView() {
                             className="border border-gray-300 text-sm px-4 py-1.5 rounded hover:bg-gray-50"
                         >
                             목록
+                        </button>
+                        <button
+                            onClick={() => navigate(`/admin/boards/${boardCode}/posts/create?parent_id=${id}`)}
+                            className="bg-blue-500 text-white text-sm px-4 py-1.5 rounded hover:bg-blue-600"
+                        >
+                            답글 작성
                         </button>
                         <button
                             onClick={() => navigate(`/admin/boards/${boardCode}/posts/${id}`)}
