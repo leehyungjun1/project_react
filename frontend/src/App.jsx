@@ -1,41 +1,63 @@
+// App.jsx
 import { Routes, Route } from 'react-router-dom'
-import Home          from './pages/Home'
-import Login         from './pages/Login'
-import Register      from './pages/Register'
-import AdminLogin    from './pages/admin/AdminLogin'
-import AdminRegister from './pages/admin/managers/AdminRegister.jsx'
-import AdminList     from './pages/admin/managers/AdminList'
-import AdminLayout   from './layouts/admin/AdminLayout'
-import CodeManage from './pages/admin/settings/CodeManage'
-import AdminDetail from './pages/admin/managers/AdminDetail'
 
-const AdminDashboard = () => <div><h1 className="text-xl font-bold">대시보드</h1></div>
+// Layout Wrappers
+import PublicWrapper from './layouts/PublicWrapper'
+import AdminWrapper from './components/admin/AdminWrapper'
+
+// 일반 사용자 페이지
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Register from './pages/Register'
+
+// 관리자 로그인 페이지
+import AdminLogin from './pages/admin/AdminLogin'
+
+// 관리자 페이지 컴포넌트
+// import AdminDashboard from './pages/admin/AdminDashboard'
+import AdminList      from './pages/admin/managers/AdminList'
+import AdminRegister  from './pages/admin/managers/AdminRegister'
+import AdminDetail    from './pages/admin/managers/AdminDetail'
+import CodeManage     from './pages/admin/settings/CodeManage'
+
+// 일반 사용자 라우트 배열
+const publicRoutes = [
+    { path: '/', element: <Home /> },
+    { path: '/login', element: <Login /> },
+    { path: '/register', element: <Register /> },
+]
+
+// 관리자 하위 페이지 라우트 배열
+const adminRoutes = [
+    { path: 'managers', element: <AdminList /> },
+    { path: 'managers/register', element: <AdminRegister /> },
+    { path: 'managers/:id', element: <AdminDetail /> },
+    { path: 'settings/codes', element: <CodeManage /> },
+]
 
 function App() {
     return (
         <Routes>
-            {/* 일반 사용자 */}
-            <Route path="/"         element={<Home />} />
-            <Route path="/login"    element={<Login />} />
-            <Route path="/register" element={<Register />} />
 
-            {/* 관리자 인증 (레이아웃 없음 - admin/* 보다 먼저!) */}
-            <Route path="/admin/login"    element={<AdminLogin />} />
+            {/* ----------------------- 일반 사용자 ----------------------- */}
+            <Route element={<PublicWrapper />}>
+                {publicRoutes.map(({ path, element }) => (
+                    <Route key={path} path={path} element={element} />
+                ))}
+            </Route>
 
+            {/* ----------------------- 관리자 로그인 ----------------------- */}
+            {/* 로그인 페이지는 Layout 필요 없음 */}
+            <Route path="/admin/login" element={<AdminLogin />} />
 
+            {/* ----------------------- 관리자 페이지 ----------------------- */}
+            {/* AdminWrapper = Layout + ProtectedRoute */}
+            <Route path="/admin" element={<AdminWrapper />}>
+                {adminRoutes.map(({ path, element }) => (
+                    <Route key={path} path={path} element={element} />
+                ))}
+            </Route>
 
-            {/* 관리자 페이지 (레이아웃 있음) */}
-            <Route path="/admin/*" element={
-                <AdminLayout>
-                    <Routes>
-                        <Route path="dashboard" element={<AdminDashboard />} />
-                        <Route path="managers"          element={<AdminList />} />
-                        <Route path="managers/register" element={<AdminRegister />} />
-                        <Route path="managers/:id"      element={<AdminDetail />} />
-                        <Route path="settings/codes"    element={<CodeManage />} />
-                    </Routes>
-                </AdminLayout>
-            } />
         </Routes>
     )
 }

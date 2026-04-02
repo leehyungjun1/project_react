@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom'
+
 import { useAdminAuth } from '../../context/AdminAuthContext'
 import {
     FaGauge,
@@ -39,7 +40,7 @@ const menus = [
         ]},
 ]
 
-function AdminLayout({ children }) {
+function AdminLayout() {
     const navigate              = useNavigate()
     const location              = useLocation()
     const { admin, logout }     = useAdminAuth()
@@ -244,7 +245,7 @@ function AdminLayout({ children }) {
 
                 {/* ===== 콘텐츠 영역 ===== */}
                 <main className="flex-1 p-6 min-w-0">
-                    {children}
+                    <Outlet />
                 </main>
 
             </div>

@@ -38,6 +38,15 @@ $routes->group('api', function($routes) {
                 $routes->delete('(:num)', 'Api\Admin\Managers\AdminController::delete/$1');
             });
 
+            // 게시판 관리
+            $routes->group('boards', function($routes) {
+                $routes->get('',          'Api\Admin\Board\BoardController::index');
+                $routes->post('',         'Api\Admin\Board\BoardController::store');
+                $routes->get('(:num)',    'Api\Admin\Board\BoardController::show/$1');
+                $routes->put('(:num)',    'Api\Admin\Board\BoardController::update/$1');
+                $routes->delete('(:num)', 'Api\Admin\Board\BoardController::delete/$1');
+            });
+
             // 설정
             $routes->group('settings', function($routes) {
 

@@ -1,3 +1,14 @@
-### 관리자 목록
-GET http://localhost:8080/api/admin/managers
+POST http://localhost:8080/api/admin/boards
 Content-Type: application/json
+
+{
+  "board_code"  : "notice",
+  "board_name"  : "공지사항",
+  "skin_type"   : "normal",
+  "description" : "공지사항 게시판입니다.",
+  "use_comment" : 1,
+  "use_rating"  : 0,
+  "use_file"    : 1,
+  "use_secret"  : 0,
+  "list_count"  : 20
+}
