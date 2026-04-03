@@ -21,6 +21,8 @@ class BoardModel extends Model
         'file_count',
         'file_size',
         'list_count',
+        'new_days',
+        'best_count',
         'order_no',
         'is_active',
     ];

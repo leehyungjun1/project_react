@@ -27,6 +27,8 @@ function BoardForm() {
         list_count  : '20',
         order_no    : '0',
         is_active   : '1',
+        new_days   : '3',
+        best_count : '100',
     })
 
     const [permissions, setPermissions] = useState([
@@ -45,6 +47,8 @@ function BoardForm() {
             p.target_type === targetType ? { ...p, [field]: value ? 1 : 0 } : p
         ))
     }
+
+    const [headers, setHeaders] = useState([])
 
     // 상세 조회 (수정 시)
     useEffect(() => {
@@ -67,7 +71,15 @@ function BoardForm() {
                     list_count  : data.list_count,
                     order_no    : data.order_no,
                     is_active   : data.is_active,
+                    new_days   : data.new_days   ?? '3',
+                    best_count : data.best_count ?? '100',
                 })
+
+                if (data.headers?.length > 0) {
+                    setHeaders(data.headers)
+                }
+
+
                 if (data.permissions?.length > 0) {
                     setPermissions(data.permissions)
                 }

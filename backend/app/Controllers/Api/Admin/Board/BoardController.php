@@ -61,6 +61,7 @@ class BoardController extends ResourceController
     public function show($id = null)
     {
         $boardModel = new BoardModel();
+        $headerModel = new \App\Models\Board\BoardHeaderModel();
         $board      = $boardModel->find($id);
 
         if (!$board) {
@@ -78,6 +79,7 @@ class BoardController extends ResourceController
             ->getResultArray();
 
         $board['permissions'] = $permissions;
+        $board['headers']     = $headerModel->getByBoardId($id);
 
         return $this->respond([
             'status' => true,
@@ -120,7 +122,24 @@ class BoardController extends ResourceController
             'list_count'  => $json['list_count']    ?? 20,
             'order_no'    => $json['order_no']      ?? 0,
             'is_active'   => $json['is_active']     ?? 1,
+            'new_days'   => $json['new_days']   ?? 3,
+            'best_count' => $json['best_count'] ?? 100,
         ], true);
+
+        // 머리말 등록
+        if (!empty($json['headers'])) {
+            $headerModel = new \App\Models\Board\BoardHeaderModel();
+            foreach ($json['headers'] as $index => $header) {
+                if (empty($header['name'])) continue;
+                $headerModel->insert([
+                    'board_id' => $boardId,
+                    'name'     => $header['name'],
+                    'color'    => $header['color'] ?? null,
+                    'order_no' => $index,
+                    'is_use'   => 1,
+                ]);
+            }
+        }
 
         // 게시판 테이블 자동 생성
         $tableService = new BoardTableService();
@@ -168,7 +187,28 @@ class BoardController extends ResourceController
             'list_count'  => $json['list_count']  ?? $board['list_count'],
             'order_no'    => $json['order_no']    ?? $board['order_no'],
             'is_active'   => $json['is_active']   ?? $board['is_active'],
+            'new_days'   => $json['new_days']   ?? $board['new_days'],
+            'best_count' => $json['best_count'] ?? $board['best_count'],
         ]);
+
+        if (isset($json['headers'])) {
+            $headerModel = new \App\Models\Board\BoardHeaderModel();
+            // 기존 머리말 삭제
+            $db->table('board_headers')->where('board_id', $id)->delete();
+            // 새 머리말 등록
+            if (!empty($json['headers'])) {
+                foreach ($json['headers'] as $index => $header) {
+                    if (empty($header['name'])) continue;
+                    $headerModel->insert([
+                        'board_id' => $id,
+                        'name'     => $header['name'],
+                        'color'    => $header['color'] ?? null,
+                        'order_no' => $index,
+                        'is_use'   => 1,
+                    ]);
+                }
+            }
+        }
 
         // 권한 업데이트
         if (!empty($json['permissions'])) {
