@@ -3,6 +3,7 @@ import api from '@/api/axios'
 import { showAlert } from '@/utils/modal'
 import { FaImage, FaTrash } from 'react-icons/fa6'
 
+const storageUrl = import.meta.env.VITE_STORAGE_URL ?? 'http://localhost:8080'
 function ImageUpload({
                          value,           // 현재 이미지 경로
                          onChange,        // 이미지 경로 변경 콜백 (path) => void
@@ -55,7 +56,7 @@ function ImageUpload({
                 {value ? (
                     <>
                         <img
-                            src={`http://localhost:8080/${value}`}
+                            src={`${storageUrl}/${value}`}
                             alt="업로드 이미지"
                             className="w-full h-full object-contain"
                         />

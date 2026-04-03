@@ -5,6 +5,8 @@ import { showAlert, showConfirm } from '@/utils/modal'
 import { FaImage } from 'react-icons/fa6'
 import api from '@/api/axios'
 
+const storageUrl = import.meta.env.VITE_STORAGE_URL ?? 'http://localhost:8080'
+
 function GallerySkin({ board, list, total, lastPage, loading, filter, setFilter, fetchList, boardCode }) {
     const navigate = useNavigate()
 
@@ -102,7 +104,7 @@ function GallerySkin({ board, list, total, lastPage, loading, filter, setFilter,
                             <div className="relative aspect-square bg-gray-100 overflow-hidden">
                                 {item.thumbnail ? (
                                     <img
-                                        src={`http://localhost:8080/${item.thumbnail}`}
+                                        src={`${storageUrl}/${item.thumbnail}`}
                                         alt={item.title}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                                     />

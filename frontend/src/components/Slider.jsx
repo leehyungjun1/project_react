@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa6'
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') ?? 'http://localhost:8080'
+
 function Slider({ banner }) {
     const [current, setCurrent]   = useState(0)
     const [animate, setAnimate]   = useState(true)
@@ -193,7 +195,7 @@ function SliderItem({ item }) {
         <div className="w-full h-full">
             {item.image_path ? (
                 <img
-                    src={`http://localhost:8080/${item.image_path}`}
+                    src={`${BASE_URL}/${item.image_path}`}
                     alt={item.description ?? ''}
                     className="w-full h-full object-cover"
                 />
