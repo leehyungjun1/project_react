@@ -31,6 +31,7 @@ const menus = [
         ]},
     { label : '디자인', path  : '/admin/design', icon: FaPaintBrush, sub: [
             { label: '슬라이드 배너', path: '/admin/design/banners' },
+            { label: '팝업 관리',     path: '/admin/design/popups' },
         ]},
     { label: '상품 관리',  path: '/admin/products',  icon: FaBox,        sub: [
             { label: '상품 리스트', path: '/admin/products' },

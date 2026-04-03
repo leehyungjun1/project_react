@@ -10,6 +10,9 @@ $routes->get('/', 'Home::index');
 $routes->group('api', function($routes) {
 
     $routes->get('banners/(:segment)', 'Api\BannerController::showByCode/$1');
+    // 프론트용 팝업
+    $routes->get('popups',           'Api\PopupController::index');
+    $routes->get('popups/(:segment)', 'Api\PopupController::showByCode/$1');
 
     // ===== 일반 회원 인증 (JWT 없음) =====
     $routes->group('auth', function($routes) {
@@ -66,6 +69,12 @@ $routes->group('api', function($routes) {
                 $routes->put('banners/(:num)',    'Api\Admin\Design\BannerController::update/$1');
                 $routes->delete('banners/(:num)', 'Api\Admin\Design\BannerController::delete/$1');
                 $routes->post('banners/(:num)/upload', 'Api\Admin\Design\BannerController::uploadImage/$1');
+
+                $routes->get('popups',           'Api\Admin\Design\PopupController::index');
+                $routes->post('popups',          'Api\Admin\Design\PopupController::store');
+                $routes->get('popups/(:num)',    'Api\Admin\Design\PopupController::show/$1');
+                $routes->put('popups/(:num)',    'Api\Admin\Design\PopupController::update/$1');
+                $routes->delete('popups/(:num)', 'Api\Admin\Design\PopupController::delete/$1');
             });
 
             // 게시글 관리

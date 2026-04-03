@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import api from '@/api/axios'
 import Slider from '@/components/Slider'
+import Popup from '@/components/Popup'
 
 function Home() {
     const { user, logout } = useAuth()
@@ -57,6 +58,12 @@ function Home() {
             {/* 메인 */}
             <main className="max-w-2xl mx-auto p-6">
                 <div>
+                    {/* 전체 활성 팝업 */}
+                    <Popup />
+
+                    {/* 특정 팝업만 */}
+                    <Popup codes={['main_popup', 'event_popup']} />
+
                     {/* mainBanner가 있을 때만 슬라이더 표시 */}
                     {mainBanner && <Slider banner={mainBanner} />}
                 </div>

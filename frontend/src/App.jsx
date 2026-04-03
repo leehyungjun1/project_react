@@ -20,6 +20,8 @@ import AdminRegister    from './pages/admin/managers/AdminRegister'
 import AdminDetail      from './pages/admin/managers/AdminDetail'
 import BannerList       from './pages/admin/design/BannerList'
 import BannerForm       from './pages/admin/design/BannerForm'
+import PopupList        from './pages/admin/design/PopupList'
+import PopupForm        from './pages/admin/design/PopupForm'
 import SiteSetting      from './pages/admin/settings/SiteSetting'
 import CodeManage       from './pages/admin/settings/CodeManage'
 import BoardList        from './pages/admin/boards/BoardList'
@@ -43,6 +45,9 @@ const adminRoutes = [
     { path: 'design/banners', element: <BannerList /> },
     { path: 'design/banners/create', element: <BannerForm /> },
     { path: 'design/banners/:id', element: <BannerForm /> },
+    { path: 'design/popups', element: <PopupList  /> },
+    { path: 'design/popups/create', element: <PopupForm /> },
+    { path: 'design/popups/:id', element: <PopupForm /> },
     { path: 'settings/site', element: <SiteSetting /> },
     { path: 'settings/codes', element: <CodeManage /> },
     { path: 'boards', element: <BoardList /> },
