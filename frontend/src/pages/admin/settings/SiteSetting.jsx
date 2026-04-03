@@ -5,6 +5,7 @@ import PageHeader from '@/components/admin/PageHeader'
 import * as FC from '@/components/admin/FormComponents'
 import { showAlert } from '@/utils/modal'
 import { useForm } from '@/hooks/useForm'
+import ImageUpload from '@/components/ImageUpload'
 
 function SiteSetting() {
     const [loading, setLoading]         = useState(false)
@@ -157,90 +158,27 @@ function SiteSetting() {
 
                     {/* ✅ 로고 */}
                     <FC.Row label="로고">
-                        <div className="flex flex-col gap-2">
-                            {form.logo ? (
-                                <div className="relative inline-block">
-                                    <img
-                                        src={`http://localhost:8080/${form.logo}`}
-                                        alt="로고"
-                                        className="h-16 object-contain border border-gray-200 rounded p-1"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setForm(prev => ({ ...prev, logo: '' }))}
-                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="w-32 h-16 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-gray-300">
-                                    <FaImage size={24} />
-                                </div>
-                            )}
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => logoInputRef.current?.click()}
-                                    disabled={uploading.logo}
-                                    className="text-sm border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 disabled:opacity-50"
-                                >
-                                    {uploading.logo ? '업로드 중...' : '파일 선택'}
-                                </button>
-                                <span className="text-xs text-gray-400">PNG, JPG, SVG 권장</span>
-                            </div>
-                            <input
-                                ref={logoInputRef}
-                                type="file"
-                                accept="image/*"
-                                className="hidden"
-                                onChange={(e) => handleFileUpload(e, 'logo')}
-                            />
-                        </div>
+                        <ImageUpload
+                            value={form.logo}
+                            onChange={(path) => setForm(prev => ({ ...prev, logo: path }))}
+                            folder="site"
+                            width="w-48"
+                            height="h-20"
+                            hint="PNG, JPG, SVG 권장"
+                        />
                     </FC.Row>
 
                     {/* ✅ 파비콘 */}
                     <FC.Row label="파비콘">
-                        <div className="flex flex-col gap-2">
-                            {form.favicon ? (
-                                <div className="relative inline-block">
-                                    <img
-                                        src={`http://localhost:8080/${form.favicon}`}
-                                        alt="파비콘"
-                                        className="w-10 h-10 object-contain border border-gray-200 rounded p-1"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setForm(prev => ({ ...prev, favicon: '' }))}
-                                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="w-10 h-10 border-2 border-dashed border-gray-300 rounded flex items-center justify-center text-gray-300">
-                                    <FaImage size={16} />
-                                </div>
-                            )}
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => faviconInputRef.current?.click()}
-                                    disabled={uploading.favicon}
-                                    className="text-sm border border-gray-300 px-3 py-1.5 rounded hover:bg-gray-50 disabled:opacity-50"
-                                >
-                                    {uploading.favicon ? '업로드 중...' : '파일 선택'}
-                                </button>
-                                <span className="text-xs text-gray-400">ICO, PNG 권장 (32x32)</span>
-                            </div>
-                            <input
-                                ref={faviconInputRef}
-                                type="file"
-                                accept="image/*,.ico"
-                                className="hidden"
-                                onChange={(e) => handleFileUpload(e, 'favicon')}
-                            />
-                        </div>
+                        <ImageUpload
+                            value={form.favicon}
+                            onChange={(path) => setForm(prev => ({ ...prev, favicon: path }))}
+                            folder="site"
+                            width="w-16"
+                            height="h-16"
+                            accept="image/*,.ico"
+                            hint="ICO, PNG 권장 (32x32)"
+                        />
                     </FC.Row>
                 </div>
 

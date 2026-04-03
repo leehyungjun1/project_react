@@ -18,6 +18,8 @@ import AdminLogin from './pages/admin/AdminLogin'
 import AdminList        from './pages/admin/managers/AdminList'
 import AdminRegister    from './pages/admin/managers/AdminRegister'
 import AdminDetail      from './pages/admin/managers/AdminDetail'
+import BannerList       from './pages/admin/design/BannerList'
+import BannerForm       from './pages/admin/design/BannerForm'
 import SiteSetting      from './pages/admin/settings/SiteSetting'
 import CodeManage       from './pages/admin/settings/CodeManage'
 import BoardList        from './pages/admin/boards/BoardList'
@@ -38,6 +40,9 @@ const adminRoutes = [
     { path: 'managers', element: <AdminList /> },
     { path: 'managers/register', element: <AdminRegister /> },
     { path: 'managers/:id', element: <AdminDetail /> },
+    { path: 'design/banners', element: <BannerList /> },
+    { path: 'design/banners/create', element: <BannerForm /> },
+    { path: 'design/banners/:id', element: <BannerForm /> },
     { path: 'settings/site', element: <SiteSetting /> },
     { path: 'settings/codes', element: <CodeManage /> },
     { path: 'boards', element: <BoardList /> },

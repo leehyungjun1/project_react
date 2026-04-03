@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, Link, Outlet } from 'react-router-dom'
 
+
 import { useAdminAuth } from '../../context/AdminAuthContext'
 import {
     FaGauge,
@@ -14,6 +15,8 @@ import {
     FaBars,
 } from 'react-icons/fa6'
 
+import { FaPaintBrush } from 'react-icons/fa'
+
 // 메뉴 구조
 const menus = [
     { label: '대시보드',   path: '/admin/dashboard', icon: FaGauge,      sub: [] },
@@ -25,6 +28,9 @@ const menus = [
             { label: '관리자 리스트',  path: '/admin/managers' },
             { label: '관리자 가입',    path: '/admin/managers/register' },
             { label: '승인 대기 목록', path: '/admin/managers/pending' },
+        ]},
+    { label : '디자인', path  : '/admin/design', icon: FaPaintBrush, sub: [
+            { label: '슬라이드 배너', path: '/admin/design/banners' },
         ]},
     { label: '상품 관리',  path: '/admin/products',  icon: FaBox,        sub: [
             { label: '상품 리스트', path: '/admin/products' },

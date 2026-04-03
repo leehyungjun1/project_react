@@ -1,9 +1,24 @@
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import api from '@/api/axios'
+import Slider from '@/components/Slider'
 
 function Home() {
     const { user, logout } = useAuth()
     const navigate         = useNavigate()
+    const [mainBanner, setMainBanner] = useState(null)
+
+    useEffect(() => {
+        // 'main_banner' 코드로 배너 가져오기
+        api.get('/banners/main_banner')
+            .then(res => {
+                setMainBanner(res.data.data)  // 배너 데이터 저장
+            })
+            .catch(err => {
+                console.error('배너 로딩 실패', err)
+            })
+    }, [])
 
     const handleLogout = () => {
         logout()
@@ -41,9 +56,10 @@ function Home() {
 
             {/* 메인 */}
             <main className="max-w-2xl mx-auto p-6">
-                <h2 className="text-lg font-bold text-gray-700">
-                    중고 거래 물품
-                </h2>
+                <div>
+                    {/* mainBanner가 있을 때만 슬라이더 표시 */}
+                    {mainBanner && <Slider banner={mainBanner} />}
+                </div>
             </main>
         </div>
     )

@@ -9,11 +9,19 @@ $routes->get('/', 'Home::index');
 // ===== API 라우트 =====
 $routes->group('api', function($routes) {
 
+    $routes->get('banners/(:segment)', 'Api\BannerController::showByCode/$1');
+
     // ===== 일반 회원 인증 (JWT 없음) =====
     $routes->group('auth', function($routes) {
         $routes->post('register', 'Api\AuthController::register');
         $routes->post('login',    'Api\AuthController::login');
         $routes->post('logout',   'Api\AuthController::logout');
+    });
+
+    // ===== 공통 파일 업로드 (JWT 필요) =====
+    $routes->group('', ['filter' => 'jwt'], function($routes) {
+        $routes->post('upload',   'Api\FileController::upload');
+        $routes->delete('upload', 'Api\FileController::delete');
     });
 
     // ===== 관리자 =====
@@ -48,6 +56,16 @@ $routes->group('api', function($routes) {
                 $routes->put('(:num)',    'Api\Admin\Board\BoardController::update/$1');
                 $routes->delete('(:num)', 'Api\Admin\Board\BoardController::delete/$1');
                 $routes->get('code/(:segment)', 'Api\Admin\Board\BoardController::showByCode/$1');
+            });
+
+            // 디자인 관리
+            $routes->group('design', function($routes) {
+                $routes->get('banners',           'Api\Admin\Design\BannerController::index');
+                $routes->post('banners',          'Api\Admin\Design\BannerController::store');
+                $routes->get('banners/(:num)',    'Api\Admin\Design\BannerController::show/$1');
+                $routes->put('banners/(:num)',    'Api\Admin\Design\BannerController::update/$1');
+                $routes->delete('banners/(:num)', 'Api\Admin\Design\BannerController::delete/$1');
+                $routes->post('banners/(:num)/upload', 'Api\Admin\Design\BannerController::uploadImage/$1');
             });
 
             // 게시글 관리
