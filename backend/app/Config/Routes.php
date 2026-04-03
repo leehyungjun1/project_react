@@ -63,6 +63,9 @@ $routes->group('api', function($routes) {
 
             // 설정
             $routes->group('settings', function($routes) {
+                $routes->get('site',  'Api\Admin\Settings\SiteSettingController::index');
+                $routes->post('site', 'Api\Admin\Settings\SiteSettingController::store');
+                $routes->post('site/upload', 'Api\Admin\Settings\SiteSettingController::uploadFile');
 
                 // 코드 관리
                 $routes->group('codes', function($routes) {

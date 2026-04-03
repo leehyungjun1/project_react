@@ -35,7 +35,7 @@ const menus = [
             { label: '댓글 관리',     path: '/admin/boards/comments' },
         ]},
     { label: '설정',       path: '/admin/settings',  icon: FaGear,       sub: [
-            { label: '기본 설정', path: '/admin/settings' },
+            { label: '기본 설정', path: '/admin/settings/site', icon: FaGear },
             { label: '코드 관리', path: '/admin/settings/codes' },
         ]},
 ]
