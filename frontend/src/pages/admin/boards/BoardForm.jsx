@@ -100,10 +100,10 @@ function BoardForm() {
         setLoading(true)
         try {
             if (isEdit) {
-                await api.put(`/admin/boards/${id}`, { ...form, permissions })
+                await api.put(`/admin/boards/${id}`, { ...form, permissions, headers })
                 showAlert('success', '수정 완료', '수정되었습니다.', () => navigate('/admin/boards'))
             } else {
-                await api.post('/admin/boards', { ...form, permissions })
+                await api.post('/admin/boards', { ...form, permissions, headers })
                 showAlert('success', '등록 완료', '게시판이 생성되었습니다.', () => navigate('/admin/boards'))
             }
         } catch (err) {
@@ -263,6 +263,90 @@ function BoardForm() {
                         )}
                     </div>
 
+                    {/* ===== 신규글 / 베스트 설정 ===== */}
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-2">신규글 / 베스트 설정</h2>
+
+                        <FC.Row label="신규글 기간">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    name="new_days"
+                                    value={form.new_days}
+                                    onChange={handleChange}
+                                    className="w-20 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                                />
+                                <span className="text-xs text-gray-400">일 이내 신규 표시</span>
+                            </div>
+                        </FC.Row>
+
+                        <FC.Row label="베스트 기준">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    name="best_count"
+                                    value={form.best_count}
+                                    onChange={handleChange}
+                                    className="w-20 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                                />
+                                <span className="text-xs text-gray-400">회 이상 조회 시 베스트 표시</span>
+                            </div>
+                        </FC.Row>
+                    </div>
+
+                    {/* 머리말 */}
+                    {/* ===== 머리말 설정 ===== */}
+                    <div className="bg-white rounded-lg shadow p-4">
+                        <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-2">
+                            머리말 설정
+                            <button
+                                type="button"
+                                onClick={() => setHeaders(prev => [...prev, { name: '', color: '#6366f1' }])}
+                                className="ml-2 text-xs bg-blue-500 text-white px-2 py-0.5 rounded hover:bg-blue-600 font-normal"
+                            >
+                                + 추가
+                            </button>
+                        </h2>
+
+                        {headers.length === 0 ? (
+                            <p className="text-xs text-gray-400 py-2">머리말이 없습니다.</p>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                {headers.map((header, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <input
+                                            type="color"
+                                            value={header.color ?? '#6366f1'}
+                                            onChange={(e) => {
+                                                const updated = [...headers]
+                                                updated[index].color = e.target.value
+                                                setHeaders(updated)
+                                            }}
+                                            className="w-8 h-8 rounded cursor-pointer border border-gray-300"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={header.name}
+                                            placeholder="머리말 이름 (예: 공지, 자격증)"
+                                            onChange={(e) => {
+                                                const updated = [...headers]
+                                                updated[index].name = e.target.value
+                                                setHeaders(updated)
+                                            }}
+                                            className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setHeaders(prev => prev.filter((_, i) => i !== index))}
+                                            className="text-red-400 hover:text-red-600 text-xs"
+                                        >
+                                            삭제
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     {/* ===== 권한 설정 ===== */}
                     <div className="bg-white rounded-lg shadow p-4">
                         <h2 className="text-sm font-bold text-gray-700 bg-gray-50 px-3 py-2 rounded mb-3">권한 설정</h2>
@@ -286,7 +370,7 @@ function BoardForm() {
                                         <td key={f.key} className="py-2.5 text-center">
                                             <input
                                                 type="checkbox"
-                                                checked={perm[f.key] === 1}
+                                                checked={perm[f.key] === 1 || perm[f.key] === '1'}
                                                 onChange={(e) => handlePermissionChange(perm.target_type, f.key, e.target.checked)}
                                                 className="accent-orange-500 w-4 h-4 cursor-pointer"
                                             />

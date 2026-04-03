@@ -26,6 +26,7 @@ function PostForm() {
     const [form, setForm] = useState({
         title          : '',
         parent_id      : '',
+        header_id      : '',
         is_notice      : '0',
         is_secret      : '0',
         is_main        : '0',
@@ -45,11 +46,14 @@ function PostForm() {
         const fetchData = async () => {
             try {
                 if (isEdit) {
+                    // 수정 시 - 기존 코드 그대로
                     const res = await api.get(`/admin/boards/${boardCode}/posts/${id}`)
-                    setBoard(res.data.data.board)
+                    const boardRes = await api.get(`/admin/boards/code/${boardCode}`)  // ✅ headers 포함
+                    setBoard(boardRes.data.data)
                     const post = res.data.data.post
                     setForm({
                         title          : post.title          ?? '',
+                        header_id      : post.header_id      ?? '',  // ✅ 추가
                         is_notice      : post.is_notice      ?? '0',
                         is_secret      : post.is_secret      ?? '0',
                         is_main        : post.is_main        ?? '0',
@@ -59,18 +63,14 @@ function PostForm() {
                         event_start_at : post.event_start_at ?? '',
                         event_end_at   : post.event_end_at   ?? '',
                     })
-
-                    // ✅ setTimeout으로 감싸기
                     setTimeout(() => {
-                        const instance = editorRef.current?.getInstance()
-                        if (instance) {
-                            instance.setHTML(post.content ?? '')
-                        }
+                        editorRef.current?.getInstance().setHTML(post.content ?? '')
                     }, 100)
 
                 } else {
-                    const res = await api.get(`/admin/boards/${boardCode}/posts`, { params: { per_page: 1 } })
-                    setBoard(res.data.data.board)
+                    // ✅ 등록 시 - 게시판 상세로 변경 (headers 포함)
+                    const boardRes = await api.get(`/admin/boards/code/${boardCode}`)
+                    setBoard(boardRes.data.data)
 
                     const parentId = searchParams.get('parent_id')
                     if (parentId) {
@@ -83,19 +83,17 @@ function PostForm() {
                             title     : `RE: ${parentPost.title}`,
                         }))
 
-                        // ✅ setTimeout으로 감싸기
                         setTimeout(() => {
                             const instance = editorRef.current?.getInstance()
                             if (instance) {
                                 const originalContent = `
-                            <p><br></p><p><br></p>
-                            <hr>
-                            <p style="color:#888; font-size:12px;">원본글 - ${parentPost.writer} (${parentPost.created_at?.slice(0, 16)})</p>
-                            <div style="color:#888; font-size:12px;">${parentPost.content ?? ''}</div>
-                        `
+                                <p><br></p><p><br></p>
+                                <hr>
+                                <p style="color:#888; font-size:12px;">원본글 - ${parentPost.writer} (${parentPost.created_at?.slice(0, 16)})</p>
+                                <div style="color:#888; font-size:12px;">${parentPost.content ?? ''}</div>
+                            `
                                 instance.setHTML(originalContent)
 
-                                // ✅ 커서 + 스크롤 맨 위로
                                 setTimeout(() => {
                                     const editorEl = document.querySelector('[contenteditable=true]')
                                     if (editorEl) {
@@ -279,6 +277,45 @@ function PostForm() {
                         {board?.board_name} <span className="text-gray-400">({boardCode})</span>
                     </div>
                 </div>
+
+                {/* 머리말 */}
+                {board?.headers?.length > 0 && (
+                    <div className="flex items-start border-b border-gray-100 px-4 py-3">
+                        <div className="w-32 shrink-0 text-sm font-medium text-gray-600 py-1.5">머리말</div>
+                        <div className="flex-1 flex flex-wrap gap-2 pt-1">
+                            <button
+                                type="button"
+                                onClick={() => setForm({ ...form, header_id: '' })}
+                                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                                    form.header_id === ''
+                                        ? 'bg-gray-700 text-white border-gray-700'
+                                        : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                전체
+                            </button>
+                            {board.headers.map(header => (
+                                <button
+                                    key={header.id}
+                                    type="button"
+                                    onClick={() => setForm({ ...form, header_id: header.id })}
+                                    className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                                        form.header_id === header.id || form.header_id === String(header.id)
+                                            ? 'text-white border-transparent'
+                                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                                    }`}
+                                    style={
+                                        form.header_id === header.id || form.header_id === String(header.id)
+                                            ? { backgroundColor: header.color, borderColor: header.color }
+                                            : {}
+                                    }
+                                >
+                                    {header.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* 제목 */}
                 <div className="flex items-start border-b border-gray-100 px-4 py-3">

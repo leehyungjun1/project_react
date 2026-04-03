@@ -194,7 +194,7 @@ class BoardController extends ResourceController
         if (isset($json['headers'])) {
             $headerModel = new \App\Models\Board\BoardHeaderModel();
             // 기존 머리말 삭제
-            $db->table('board_headers')->where('board_id', $id)->delete();
+            $headerModel->where('board_id', $id)->delete();
             // 새 머리말 등록
             if (!empty($json['headers'])) {
                 foreach ($json['headers'] as $index => $header) {
@@ -252,6 +252,35 @@ class BoardController extends ResourceController
         return $this->respond([
             'status'  => true,
             'message' => '삭제되었습니다.',
+        ]);
+    }
+
+    // BoardController.php
+    public function showByCode($boardCode = null)
+    {
+        $boardModel  = new BoardModel();
+        $headerModel = new \App\Models\Board\BoardHeaderModel();
+        $board       = $boardModel->findByCode($boardCode);
+
+        if (!$board) {
+            return $this->respond([
+                'status'  => false,
+                'message' => '게시판을 찾을 수 없습니다.',
+            ], ResponseInterface::HTTP_NOT_FOUND);
+        }
+
+        $db          = \Config\Database::connect();
+        $permissions = $db->table('board_permissions')
+            ->where('board_id', $board['id'])
+            ->get()
+            ->getResultArray();
+
+        $board['permissions'] = $permissions;
+        $board['headers']     = $headerModel->getByBoardId($board['id']);
+
+        return $this->respond([
+            'status' => true,
+            'data'   => $board,
         ]);
     }
 }

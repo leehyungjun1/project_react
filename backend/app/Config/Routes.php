@@ -47,6 +47,7 @@ $routes->group('api', function($routes) {
                 $routes->get('(:num)',    'Api\Admin\Board\BoardController::show/$1');
                 $routes->put('(:num)',    'Api\Admin\Board\BoardController::update/$1');
                 $routes->delete('(:num)', 'Api\Admin\Board\BoardController::delete/$1');
+                $routes->get('code/(:segment)', 'Api\Admin\Board\BoardController::showByCode/$1');
             });
 
             // 게시글 관리
