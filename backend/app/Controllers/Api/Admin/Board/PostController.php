@@ -67,8 +67,8 @@ class PostController extends ResourceController
                 'list'      => $list,
                 'total'     => $total,
                 'page'      => $page,
-                'per_page'  => $perPage,
-                'last_page' => ceil($total / $perPage),
+                'perPage'  => $perPage,
+                'lastPage' => ceil($total / $perPage),
             ],
         ]);
     }

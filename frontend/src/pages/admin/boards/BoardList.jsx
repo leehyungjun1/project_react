@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '@/api/axios'
 import PageHeader from '@/components/admin/PageHeader'
-import * as LC from '@/components/admin/ListComponents'
-import { showAlert, showConfirm } from '@/utils/modal'
+import { useListData } from '@/hooks/useListData';
+import { handleDeleteItem } from '@/utils/listActions';
+import api from '@/api/axios'
+import * as FC from "@/components/admin/FormComponents.jsx";
+import * as LC from "@/components/admin/ListComponents.jsx";
+
+const INITIAL_FILTER = {
+    keyword    : '',
+    skin_type  : '',
+    is_active  : '',
+    page       : 1,
+    per_page   : 20,
+}
 
 // 스킨 뱃지
 const SkinBadge = ({ value }) => {
@@ -23,82 +33,28 @@ const SkinBadge = ({ value }) => {
 
 function BoardList() {
     const navigate            = useNavigate()
-    const [list, setList]             = useState([])
-    const [loading, setLoading]     = useState(false)
-
-    const [filter, setFilter] = useState({
-        keyword    : '',
-        skin_type  : '',
-        is_active  : '',
-        page       : 1,
-        per_page   : 20,
-    })
-
-    const [total, setTotal]         = useState(0)
-    const [lastPage, setLastPage]   = useState(1)
-
-    // 목록 조회
-    const fetchList = async (params = filter) => {
-        setLoading(true)
-        try {
-            const res = await api.get('/admin/boards', { params })
-            setList(res.data.data.list)
-            setTotal(res.data.data.total)
-            setLastPage(res.data.data.lastPage)
-        } catch (err) {
-            showAlert('error', '오류', '목록을 불러오는데 실패했습니다.')
-        } finally {
-            setLoading(false)
-        }
-    }
+    const {
+        list, total, lastPage, loading,
+        filter, setFilter,
+        fetchList,
+        handleFilterChange,
+        handleSearch,
+        handleReset,
+        handlePageChange,
+    } = useListData('/admin/boards', INITIAL_FILTER);
 
     useEffect(() => {
-        fetchList()
+        fetchList(filter)
     }, [])
 
-    // 필터 변경
-    const handleFilterChange = (e) => {
-        setFilter({ ...filter, [e.target.name]: e.target.value })
-    }
-
-    // 검색
-    const handleSearch = () => {
-        const newFilter = { ...filter, page: 1 }
-        setFilter(newFilter)
-        fetchList(newFilter)
-    }
-
-    // 초기화
-    const handleReset = () => {
-        const newFilter = {
-            keyword     : '',
-            search_type : 'name',
-            is_active   : '',
-            skin_type   : '',
-            page        : 1,
-            per_page    : 20,
-        }
-        setFilter(newFilter)
-        fetchList(newFilter)
-    }
-
-    // 페이지 변경
-    const handlePageChange = (page) => {
-        const newFilter = { ...filter, page }
-        setFilter(newFilter)
-        fetchList(newFilter)
-    }
-
-    const handleDelete = (id, name) => {
-        showConfirm('삭제', `"${name}" 게시판을 삭제하시겠습니까?`, async () => {
-            try {
-                await api.delete(`/admin/boards/${id}`)
-                showAlert('success', '삭제 완료', '삭제되었습니다.', () => fetchList())
-            } catch (err) {
-                showAlert('error', '오류', '삭제 실패')
-            }
-        })
-    }
+    const handleDelete = (id, title) => {
+        handleDeleteItem({
+            api,
+            url: `/admin/board/${id}`,
+            label: title,
+            onSuccess: () => fetchList(),
+        });
+    };
 
     return (
         <div>

@@ -1,50 +1,51 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useListData } from '@/hooks/useListData';
+import { handleDeleteItem } from '@/utils/listActions';
 import { useParams } from 'react-router-dom'
 import api from '@/api/axios'
-import { showAlert } from '@/utils/modal'
+import PageHeader from '@/components/admin/PageHeader'
+import * as FC from "@/components/admin/FormComponents.jsx";
+import * as LC from "@/components/admin/ListComponents.jsx";
 import NormalSkin  from './skins/NormalSkin'
 import GallerySkin from './skins/GallerySkin'
 import QnaSkin     from './skins/QnaSkin'
 import EventSkin   from './skins/EventSkin'
 
+
+const INITIAL_FILTER = {
+    keyword     : '',
+    search_type : 'title',
+    is_use      : '',
+    is_notice   : '',
+    page        : 1,
+    per_page    : 20,
+};
+
 function PostList() {
-    const { boardCode }       = useParams()
-    const [board, setBoard]   = useState(null)
-    const [list, setList]     = useState([])
-    const [total, setTotal]   = useState(0)
-    const [lastPage, setLastPage] = useState(1)
-    const [loading, setLoading]   = useState(false)
-
-    const [filter, setFilter] = useState({
-        keyword     : '',
-        search_type : 'title',
-        is_use      : '',
-        is_notice   : '',
-        page        : 1,
-        per_page    : 20,
-    })
-
-    const fetchList = async (params = filter) => {
-        setLoading(true)
-        try {
-            const res = await api.get(`/admin/boards/${boardCode}/posts`, { params })
-            setBoard(res.data.data.board)
-            setList(res.data.data.list)
-            setTotal(res.data.data.total)
-            setLastPage(res.data.data.last_page)
-        } catch (err) {
-            showAlert('error', '오류', '목록을 불러오는데 실패했습니다.')
-        } finally {
-            setLoading(false)
-        }
-    }
+    const { boardCode }      = useParams()
+    const [board, setBoard]         = useState(null)
+    const navigate   = useNavigate()
+    const {
+        list, total, lastPage, loading,
+        filter, setFilter,
+        fetchList,
+        handleFilterChange,
+        handleSearch,
+        handleReset,
+        handlePageChange,
+    } = useListData(`/admin/boards/${boardCode}/posts`, INITIAL_FILTER);
 
     useEffect(() => {
-        if (board?.skin_type === 'qna') {
-            fetchList({ ...filter, depth: 0 })
-        } else {
-            fetchList()
+        const fetchBoard = async () => {
+            try {
+                const res = await api.get(`/admin/boards/${boardCode}`)
+                setBoard(res.data.data)
+            } catch (err) {
+                console.error('게시판 정보 로드 실패', err)
+            }
         }
+        fetchBoard()
     }, [boardCode])
 
     // 공통 props
@@ -56,8 +57,12 @@ function PostList() {
         loading,
         filter,
         setFilter,
-        fetchList,
         boardCode,
+        navigate,
+        handleFilterChange,
+        handleSearch,
+        handleReset,
+        handlePageChange,
     }
 
     // 스킨 타입에 따라 분기
