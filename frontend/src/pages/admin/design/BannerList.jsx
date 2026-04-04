@@ -1,86 +1,49 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useListData } from '@/hooks/useListData';
+import { handleDeleteItem } from '@/utils/listActions';
 import api from '@/api/axios'
 import PageHeader from '@/components/admin/PageHeader'
-import { showAlert, showConfirm } from '@/utils/modal'
 import * as FC from "@/components/admin/FormComponents.jsx";
 import * as LC from "@/components/admin/ListComponents.jsx";
 
+const INITIAL_FILTER = {
+    keyword: '',
+    effect: '',
+    is_active: '',
+    date_type: 'dated_at',
+    start_date: '',
+    end_date: '',
+    page: 1,
+    per_page: 10,
+};
+
+
 function BannerList() {
     const navigate          = useNavigate()
-    const [list, setList]   = useState([])
-    const [loading, setLoading] = useState(false)
+    const {
+        list, total, lastPage, loading,
+        filter, setFilter,
+        fetchList,
+        handleFilterChange,
+        handleSearch,
+        handleReset,
+        handlePageChange,
+    } = useListData('/admin/design/banners', INITIAL_FILTER);
 
-    const [filter, setFilter] = useState({
-        keyword : '',
-        search_type : '',
-        effect : '',
-        is_active : '',
-        start_date  : '',
-        end_date    : '',
-        date_type   : 'dated',
-        page : 1,
-        per_page : 20,
-    })
 
-    const [total, setTotal]         = useState(0)
-    const [lastPage, setLastPage]   = useState(1)
-
-    const fetchList = async (params = filter) => {
-        setLoading(true)
-        try {
-            const res = await api.get('/admin/design/banners',{params})
-            setList(res.data.data.list)
-            setTotal(res.data.data.total)
-            setLastPage(res.data.data.lastPage)
-        } catch (err) {
-            showAlert('error', '오류', '목록을 불러오는데 실패했습니다.')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    useEffect(() => { fetchList() }, [])
+    useEffect(() => {
+        fetchList(filter);
+    }, []);
 
     const handleDelete = (id, title) => {
-        showConfirm('삭제', `"${title}" 배너를 삭제하시겠습니까?`, async () => {
-            try {
-                await api.delete(`/admin/design/banners/${id}`)
-                showAlert('success', '삭제 완료', '삭제되었습니다.', () => fetchList())
-            } catch (err) {
-                showAlert('error', '오류', '삭제 실패')
-            }
-        })
-    }
-
-    const handleFilterChange = (e) => {
-        setFilter({...filter, [e.target.name]: e.target.value })
-    }
-
-    const handleSearch = () => {
-        const newFilter = { ...filter, page:1 }
-        setFilter(newFilter)
-        fetchList(newFilter)
-    }
-
-    const handleReset = () => {
-        const newFilter = {
-            keyword : '',
-            search_type : 'name',
-            'effect' : '',
-            is_active : '',
-            page : 1,
-            per_page : 20,
-        }
-        setFilter(newFilter)
-        fetchList(newFilter)
-    }
-
-    const handlePageChange = (page) => {
-        const newFilter = { ...filter, page }
-        setFilter(newFilter)
-        fetchList(newFilter)
-    }
+        handleDeleteItem({
+            api,
+            url: `/admin/design/banners/${id}`,
+            label: title,
+            onSuccess: () => fetchList(),
+        });
+    };
 
     const DeviceBadge = ({ value }) => {
         const map = {
