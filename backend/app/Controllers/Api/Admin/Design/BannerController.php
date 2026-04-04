@@ -14,10 +14,89 @@ class BannerController extends ResourceController
     // 목록
     public function index()
     {
-        $model = new BannerModel();
-        $list  = $model->where('deleted_at', null)->orderBy('id', 'DESC')->findAll();
+        $bannerModel = new BannerModel();
+        //필터 파라미터
+        $keyword    = $this->request->getGet('keyword') ?? '';
+        $searchType = $this->request->getGet('search_type') ?? 'title';
+        $isActive   = $this->request->getGet('is_active');
+        $startDate = $this->request->getGet('start_date');
+        $endDate   = $this->request->getGet('end_date');
+        $dateType  = $this->request->getGet('date_type') ?? 'dated';
+        $effect     = $this->request->getGet('effect');
+        $page       = (int)($this->request->getGet('page') ?? 1);
+        $perPage    = (int)($this->request->getGet('per_page') ?? 20);
 
-        return $this->respond(['status' => true, 'data' => $list]);
+        $allowedSearch = ['title'];
+        if (!in_array($searchType, $allowedSearch)) {
+            $searchType = 'title';
+        }
+
+        $allowed = ['dated','created_at'];
+        if (!in_array($dateType, $allowed)) {
+            $dateType = 'dated';
+        }
+
+        $bannerModel->where('deleted_at', null);
+
+
+        // 필터
+        if($dateType == 'dated') {
+            if ($startDate && $endDate) {
+                // 시작일, 종료일 둘 다 있을 때
+                $bannerModel->groupStart()
+                    ->groupStart()
+                    ->where('start_at <=', $endDate . ' 23:59:59')
+                    ->where('end_at >=', $startDate . ' 00:00:00')
+                    ->groupEnd()
+                    ->orWhere('display_type', 'always')
+                    ->groupEnd();
+            } else if ($startDate && !$endDate) {
+                // 시작일만 있을 때
+                $bannerModel->groupStart()
+                    ->where('start_at >=', $startDate . ' 00:00:00')
+                    ->orWhere('display_type', 'always')
+                    ->groupEnd();
+            } else if (!$startDate && $endDate) {
+                // 종료일만 있을 때
+                $bannerModel->groupStart()
+                    ->where('end_at <=', $endDate . ' 23:59:59')
+                    ->orWhere('display_type', 'always')
+                    ->groupEnd();
+            }
+            // 날짜 없으면 필터 없이 전체
+        } else {
+            if ($startDate && $endDate) {
+                $bannerModel->groupStart()->where("$dateType >=", $startDate . ' 00:00:00')
+                    ->where("$dateType <=", $endDate . ' 23:59:59')->groupEnd();
+            } else if ($startDate && !$endDate) {
+                $bannerModel->where("$dateType >=", $startDate . ' 00:00:00');
+            } else if (!$startDate && $endDate) {
+                $bannerModel->where("$dateType <=", $endDate . ' 23:59:59');
+            }
+        }
+
+        if($keyword) {
+            $bannerModel->groupStart()->like($searchType, $keyword)->groupEnd();
+        }
+
+        if($isActive !== null && $isActive !== '') $bannerModel->where('is_active', $isActive);
+        if($effect) $bannerModel->where('effect', $effect);
+
+        $total = $bannerModel->countAllResults(false);
+        $list = $bannerModel->orderBy('created_at', 'DESC')->findAll($perPage, ($page-1) * $perPage);
+
+        log_message('debug', (string)$bannerModel->getLastQuery());
+
+        return $this->respond([
+            'status' => true,
+            'data' => [
+                'list' => $list,
+                'total' => $total,
+                'page' => $page,
+                'perPage' => $perPage,
+                'lastPage' => ceil($total / $perPage),
+            ],
+        ]);
     }
 
     // 상세

@@ -37,16 +37,14 @@ function BoardList() {
     const [total, setTotal]         = useState(0)
     const [lastPage, setLastPage]   = useState(1)
 
-
-
     // 목록 조회
     const fetchList = async (params = filter) => {
         setLoading(true)
         try {
             const res = await api.get('/admin/boards', { params })
-            setList(res.data.data.list)      // ✅
+            setList(res.data.data.list)
             setTotal(res.data.data.total)
-            setLastPage(res.data.data.last_page)
+            setLastPage(res.data.data.lastPage)
         } catch (err) {
             showAlert('error', '오류', '목록을 불러오는데 실패했습니다.')
         } finally {

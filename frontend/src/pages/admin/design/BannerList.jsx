@@ -3,17 +3,36 @@ import { useNavigate } from 'react-router-dom'
 import api from '@/api/axios'
 import PageHeader from '@/components/admin/PageHeader'
 import { showAlert, showConfirm } from '@/utils/modal'
+import * as FC from "@/components/admin/FormComponents.jsx";
+import * as LC from "@/components/admin/ListComponents.jsx";
 
 function BannerList() {
     const navigate          = useNavigate()
     const [list, setList]   = useState([])
     const [loading, setLoading] = useState(false)
 
-    const fetchList = async () => {
+    const [filter, setFilter] = useState({
+        keyword : '',
+        search_type : '',
+        effect : '',
+        is_active : '',
+        start_date  : '',
+        end_date    : '',
+        date_type   : 'dated',
+        page : 1,
+        per_page : 20,
+    })
+
+    const [total, setTotal]         = useState(0)
+    const [lastPage, setLastPage]   = useState(1)
+
+    const fetchList = async (params = filter) => {
         setLoading(true)
         try {
-            const res = await api.get('/admin/design/banners')
-            setList(res.data.data)
+            const res = await api.get('/admin/design/banners',{params})
+            setList(res.data.data.list)
+            setTotal(res.data.data.total)
+            setLastPage(res.data.data.lastPage)
         } catch (err) {
             showAlert('error', '오류', '목록을 불러오는데 실패했습니다.')
         } finally {
@@ -32,6 +51,35 @@ function BannerList() {
                 showAlert('error', '오류', '삭제 실패')
             }
         })
+    }
+
+    const handleFilterChange = (e) => {
+        setFilter({...filter, [e.target.name]: e.target.value })
+    }
+
+    const handleSearch = () => {
+        const newFilter = { ...filter, page:1 }
+        setFilter(newFilter)
+        fetchList(newFilter)
+    }
+
+    const handleReset = () => {
+        const newFilter = {
+            keyword : '',
+            search_type : 'name',
+            'effect' : '',
+            is_active : '',
+            page : 1,
+            per_page : 20,
+        }
+        setFilter(newFilter)
+        fetchList(newFilter)
+    }
+
+    const handlePageChange = (page) => {
+        const newFilter = { ...filter, page }
+        setFilter(newFilter)
+        fetchList(newFilter)
     }
 
     const DeviceBadge = ({ value }) => {
@@ -62,10 +110,99 @@ function BannerList() {
                 }
             />
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 text-sm text-gray-500">
-                    총 <span className="font-bold text-gray-800">{list.length}</span> 건
+            <div className="bg-white rounded-lg shadow p-4 mb-4 space-y-4">
+                <div className={"flex flex-col lg:flex-row lg:items-end gap-2"}>
+                    <div className={"flex items-center gap-2 w-full"}>
+                        <input
+                            type="text"
+                            name="keyword"
+                            placeholder="배너명 또는 배너코드명"
+                            value={filter.keyword}
+                            onChange={handleFilterChange}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            className="flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400"
+                        />
+                        <button onClick={handleSearch} className="shrink-0 bg-orange-500 text-white text-sm px-4 py-1.5 rounded hover:bg-orange-600">
+                            검색
+                        </button>
+                        <button onClick={handleReset} className="shrink-0 bg-gray-200 text-gray-700 text-sm px-4 py-1.5 rounded hover:bg-gray-300">
+                            초기화
+                        </button>
+                    </div>
                 </div>
+
+                <div className={"grid grid-cols-1 lg:grid-cols-2 gap-4"}>
+                    <div className={"space-y-3"}>
+                        <label className="block text-xs text-gray-500 mb-1">배너효과</label>
+                        <select name="effect" value={filter.effect} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+                            <option value="">전체</option>
+                            <option value="slide">슬라이드</option>
+                            <option value="fade">페이드</option>
+                        </select>
+                    </div>
+
+                    <div className="space-y-3">
+                        {/* 사용여부 */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">사용여부</label>
+                            <select name="is_active" value={filter.is_active} onChange={handleFilterChange} className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400">
+                                <option value="">전체</option>
+                                <option value="1">사용</option>
+                                <option value="0">미사용</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex flex-col lg:flex-row lg:items-end gap-2">
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">기간</label>
+                        <select
+                            name="date_type"
+                            value={filter.date_type}
+                            onChange={handleFilterChange}
+                            className={FC.selectClass}
+                        >
+                            <option value="dated_at">노출기간</option>
+                            <option value="created_at">등록일</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-ls text-gray-500 mb-1">시작일</label>
+                        <input
+                            type="date"
+                            name="start_date"
+                            value={filter.start_date}
+                            onChange={handleFilterChange}
+                            className={FC.inputClass}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-xs text-gray-500 mb-1">종료일</label>
+                        <input
+                            type="date"
+                            name="end_date"
+                            value={filter.end_date}
+                            onChange={handleFilterChange}
+                            className={FC.inputClass}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+                <LC.ListHeader
+                    total={total}
+                    keyword={filter.keyword}
+                    perPage={filter.per_page}
+                    onPerPageChange={(value) => {
+                        const newFilter = { ...filter, per_page: value, page: 1 }
+                        setFilter(newFilter)
+                        fetchList(newFilter)
+                    }}
+                />
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50 border-b border-gray-200">
@@ -125,6 +262,13 @@ function BannerList() {
                         </tbody>
                     </table>
                 </div>
+                {/* 페이지네이션 */}
+                <LC.Pagination
+                    page={filter.page}
+                    lastPage={lastPage}
+                    total={total}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     )

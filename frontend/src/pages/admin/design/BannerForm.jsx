@@ -265,12 +265,12 @@ function BannerForm() {
                             {form.display_type === 'period' && (
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1">
-                                        <span className="text-xs text-gray-500">시작일</span>
+                                        <span className="w-full text-xs text-gray-500">시작일</span>
                                         <input type="datetime-local" name="start_at" value={form.start_at} onChange={handleChange} className={FC.inputClass} />
                                     </div>
                                     <span className="text-gray-400">~</span>
                                     <div className="flex items-center gap-1">
-                                        <span className="text-xs text-gray-500">종료일</span>
+                                        <span className="w-full text-xs text-gray-500">종료일</span>
                                         <input type="datetime-local" name="end_at" value={form.end_at} onChange={handleChange} className={FC.inputClass} />
                                     </div>
                                 </div>
@@ -295,6 +295,7 @@ function BannerForm() {
                         <FC.Row label="전환 시간">
                             <div className="flex items-center gap-2">
                                 <select name="interval" value={form.interval} onChange={handleChange} className={FC.selectClass}>
+                                    <option value="">수동</option>
                                     {[1,2,3,4,5,6,7,8,9,10].map(n => (
                                         <option key={n} value={n}>{n}초</option>
                                     ))}
@@ -364,7 +365,7 @@ function BannerForm() {
                                         <div className="flex items-center gap-2">
                                             <span className="text-xs text-gray-500 w-16">활성 색상</span>
                                             <input type="color" name="nav_active_color" value={form.nav_active_color} onChange={handleChange} className="w-8 h-8 rounded cursor-pointer border border-gray-300" />
-                                            <span className="text-xs text-gray-500 w-16 ml-2">비활성 색상</span>
+                                            <span className="text-xs text-gray-500 w-20 ml-2">비활성 색상</span>
                                             <input type="color" name="nav_inactive_color" value={form.nav_inactive_color} onChange={handleChange} className="w-8 h-8 rounded cursor-pointer border border-gray-300" />
                                         </div>
                                         <div className="flex items-center gap-2">
