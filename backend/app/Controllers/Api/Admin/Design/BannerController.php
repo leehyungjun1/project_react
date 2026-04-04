@@ -76,7 +76,7 @@ class BannerController extends ResourceController
         }
 
         if($keyword) {
-            $bannerModel->groupStart()->like($searchType, $keyword)->groupEnd();
+            $bannerModel->groupStart()->like('title', $keyword)->orLike('banner_code',$keyword)->groupEnd();
         }
 
         if($isActive !== null && $isActive !== '') $bannerModel->where('is_active', $isActive);
