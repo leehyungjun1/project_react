@@ -40,6 +40,19 @@ $routes->group('api', function($routes) {
 
         // ===== JWT 필요 =====
         $routes->group('', ['filter' => 'jwt'], function($routes) {
+            //회원관리
+            $routes->group('users', function($routes) {
+                $routes->get('/',                     'Api\Admin\Users\UserController::index');
+                $routes->get('grades',                'Api\Admin\Users\UserController::grades');
+                $routes->get('interests',             'Api\Admin\Users\UserController::interests');
+                $routes->get('check-id',              'Api\Admin\Users\UserController::checkId');
+                $routes->get('check-business-number', 'Api\Admin\Users\UserController::checkBizNumber');
+                $routes->get('check-referrer',        'Api\Admin\Users\UserController::checkReferrer');
+                $routes->post('create',               'Api\Admin\Users\UserController::create');
+                $routes->get('(:num)',                'Api\Admin\Users\UserController::show/$1');
+                $routes->put('(:num)',                'Api\Admin\Users\UserController::update/$1');
+                $routes->delete('(:num)',             'Api\Admin\Users\UserController::delete/$1');
+            });
 
             // 관리자 관리
             $routes->group('managers', function($routes) {
