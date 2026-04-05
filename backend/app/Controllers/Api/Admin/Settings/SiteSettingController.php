@@ -30,7 +30,7 @@ class SiteSettingController extends ResourceController
 
         $fields = [
             // 홈페이지 기본 정보
-            'site_name', 'site_name_en', 'site_title', 'site_favicon',
+            'site_name', 'site_name_en', 'site_title', 'favicon', 'logo',
             // 회사 정보
             'company_name', 'company_reg_no', 'company_ceo',
             'company_business_type', 'company_business_item',

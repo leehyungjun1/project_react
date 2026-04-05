@@ -26,7 +26,8 @@ function SiteSetting() {
         site_name    : '',
         site_name_en : '',
         site_title   : '',
-        site_favicon : '',
+        favicon      : '',
+        logo         : '',
         // 회사 정보
         company_name          : '',
         company_reg_no        : '',
@@ -156,7 +157,7 @@ function SiteSetting() {
                         <input type="text" name="site_title" value={form.site_title ?? ''} onChange={handleChange} placeholder="브라우저 상단에 표시될 타이틀" className={FC.inputClass} />
                     </FC.Row>
 
-                    {/* ✅ 로고 */}
+                    {/* 로고 */}
                     <FC.Row label="로고">
                         <ImageUpload
                             value={form.logo}
@@ -168,7 +169,7 @@ function SiteSetting() {
                         />
                     </FC.Row>
 
-                    {/* ✅ 파비콘 */}
+                    {/* 파비콘 */}
                     <FC.Row label="파비콘">
                         <ImageUpload
                             value={form.favicon}
