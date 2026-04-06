@@ -51,6 +51,26 @@ function UserDetail() {
 
     const [pointForm, setPointForm] = useState({ type: 'earn', amount: '', reason: '' })
 
+    // 마일리지 이력 fetch 함수 분리
+    const fetchMileage = (page = 1) => {
+        api.get(`/admin/users/${id}/mileage`, { params: { page } })
+            .then(res => {
+                setMileageList(res.data.data.list)
+                setMileageTotal(res.data.data.total)
+                setMileageLastPage(res.data.data.lastPage)
+            }).catch(() => {})
+    }
+
+// 캐시 이력 fetch 함수 분리
+    const fetchCash = (page = 1) => {
+        api.get(`/admin/users/${id}/cash`, { params: { page } })
+            .then(res => {
+                setCashList(res.data.data.list)
+                setCashTotal(res.data.data.total)
+                setCashLastPage(res.data.data.lastPage)
+            }).catch(() => {})
+    }
+
     useEffect(() => {
         Promise.all([
             api.get('/admin/users/grades'),
@@ -82,6 +102,10 @@ function UserDetail() {
                 setMileageLastPage(res.data.data.lastPage)
             }).catch(() => {})
     }, [mileagePage])
+
+    // useEffect는 페이지 변경 시에만
+    useEffect(() => { fetchMileage(mileagePage) }, [mileagePage])
+    useEffect(() => { fetchCash(cashPage) }, [cashPage])
 
     // 캐시 이력
     useEffect(() => {
@@ -149,6 +173,7 @@ function UserDetail() {
             showAlert('success', '완료', '처리되었습니다.', () => {
                 setMileageModal(false)
                 setPointForm({ type: 'earn', amount: '', reason: '' })
+                fetchMileage(1)
                 setMileagePage(1)
                 api.get(`/admin/users/${id}`).then(res => {
                     setForm(prev => ({ ...prev, mileage: res.data.data.mileage }))
@@ -163,6 +188,7 @@ function UserDetail() {
             showAlert('success', '완료', '처리되었습니다.', () => {
                 setCashModal(false)
                 setPointForm({ type: 'charge', amount: '', reason: '' })
+                fetchCash(1)
                 setCashPage(1)
                 api.get(`/admin/users/${id}`).then(res => {
                     setForm(prev => ({ ...prev, cash: res.data.data.cash }))

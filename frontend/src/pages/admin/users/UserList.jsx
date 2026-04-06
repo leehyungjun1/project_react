@@ -224,12 +224,12 @@ function UserList() {
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => navigate(`/admin/users/${item.id}`)}
-                                                className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                                                className="text-xs bg-gray-500 text-white px-2 py-1 rounded hover:bg-gray-600"
                                             >
                                                 상세
                                             </button>
                                             <button
-                                                onClick={() => navigate(`/admin/member/${item.id}`)}
+                                                onClick={() => navigate(`/admin/users/${item.id}?mode=edit`)}
                                                 className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                                             >
                                                 수정
