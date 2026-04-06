@@ -48,7 +48,7 @@ const INITIAL_FORM = {
     memo            : '',
 }
 
-function MemberCreate() {
+function UserCreate() {
     const navigate = useNavigate()
     const [form, setForm]       = useState(INITIAL_FORM)
     const [loading, setLoading] = useState(false)
@@ -488,4 +488,4 @@ function MemberCreate() {
     )
 }
 
-export default MemberCreate
+export default UserCreate

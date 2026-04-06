@@ -1,4 +1,5 @@
 <?php
+// app/Models/UserModel.php
 
 namespace App\Models;
 
@@ -6,26 +7,23 @@ use CodeIgniter\Model;
 
 class UserModel extends Model
 {
-    protected $table      = 'users';
-    protected $primaryKey = 'id';
+    protected $table         = 'users';
+    protected $primaryKey    = 'id';
     protected $useTimestamps = true;
+    protected $useSoftDeletes = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+    protected $deletedField  = 'deleted_at';
 
     protected $allowedFields = [
         'member_type', 'is_approved', 'grade_code',
-        'user_id', 'nickname', 'name', 'password',
+        'user_id', 'password', 'name', 'nickname',
         'email', 'email_agree', 'mobile', 'sms_agree',
         'postcode', 'address1', 'address2', 'tel',
-        'biz_name', 'biz_number', 'biz_ceo',
-        'biz_type', 'biz_item',
-        'biz_postcode', 'biz_address1', 'biz_address2', 'biz_reg_file',
-        'fax', 'job', 'gender',
-        'birth_type', 'birthday',
-        'marry_yn', 'anniversary',
         'referrer_id', 'referrer_count',
-        'interests', 'privacy_period', 'memo',
-        'last_login_at',
+        'mileage', 'cash',
+        'login_count', 'last_login_at', 'last_login_ip',
+        'is_withdrawn', 'withdrawn_at',
     ];
 
     public function getList(array $params): array
@@ -36,7 +34,9 @@ class UserModel extends Model
 
         $builder = $this->db->table('users u')
             ->select('u.*, s.name as grade_name')
-            ->join('settings s', 's.code = u.grade_code', 'left');
+            ->join('settings s', 's.code = u.grade_code AND s.is_active = 1', 'left')
+            ->where('u.deleted_at IS NULL')
+            ->where('u.is_withdrawn', 0);
 
         if (!empty($params['keyword'])) {
             $allowed = ['name', 'user_id', 'email', 'mobile'];
@@ -79,24 +79,39 @@ class UserModel extends Model
 
     public function getDetail(int $id): ?array
     {
-        return $this->db->table('users u')
+        $user = $this->db->table('users u')
             ->select('u.*, s.name as grade_name')
-            ->join('settings s', 's.code = u.grade_code', 'left')
+            ->join('settings s', 's.code = u.grade_code AND s.is_active = 1', 'left')
             ->where('u.id', $id)
+            ->where('u.deleted_at IS NULL')
             ->get()
             ->getRowArray();
+
+        if (!$user) return null;
+
+        // 프로필 정보 합치기
+        $profile = (new UserProfileModel())->getByUserId($id);
+        if ($profile) {
+            if (!empty($profile['interests'])) {
+                $profile['interests'] = json_decode($profile['interests'], true) ?? [];
+            }
+            $user = array_merge($user, $profile);
+        }
+
+        // 사업자 정보 합치기
+        if ($user['member_type'] === 'business') {
+            $business = (new UserBusinessModel())->getByUserId($id);
+            if ($business) {
+                $user = array_merge($user, $business);
+            }
+        }
+
+        return $user;
     }
 
     public function existsById(string $userId, ?int $excludeId = null): bool
     {
         $builder = $this->where('user_id', $userId);
-        if ($excludeId) $builder->where('id !=', $excludeId);
-        return $builder->countAllResults() > 0;
-    }
-
-    public function existsByBizNumber(string $bizNumber, ?int $excludeId = null): bool
-    {
-        $builder = $this->where('biz_number', $bizNumber);
         if ($excludeId) $builder->where('id !=', $excludeId);
         return $builder->countAllResults() > 0;
     }

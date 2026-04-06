@@ -52,6 +52,11 @@ $routes->group('api', function($routes) {
                 $routes->get('(:num)',                'Api\Admin\Users\UserController::show/$1');
                 $routes->put('(:num)',                'Api\Admin\Users\UserController::update/$1');
                 $routes->delete('(:num)',             'Api\Admin\Users\UserController::delete/$1');
+
+                $routes->get('(:num)/mileage',        'Api\Admin\Users\UserController::mileageHistory/$1');
+                $routes->post('(:num)/mileage',       'Api\Admin\Users\UserController::mileageAdd/$1');
+                $routes->get('(:num)/cash',           'Api\Admin\Users\UserController::cashHistory/$1');
+                $routes->post('(:num)/cash',          'Api\Admin\Users\UserController::cashAdd/$1');
             });
 
             // 관리자 관리

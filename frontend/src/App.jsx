@@ -15,8 +15,9 @@ import AdminLogin from './pages/admin/AdminLogin'
 
 // 관리자 페이지 컴포넌트
 // import AdminDashboard from './pages/admin/AdminDashboard'
-import UserList         from './pages/admin/member/MemberList'
-import UserCreate       from './pages/admin/member/MemberCreate'
+import UserList         from './pages/admin/users/UserList'
+import UserCreate       from './pages/admin/users/UserCreate'
+import UserDetail       from './pages/admin/users/UserDetail'
 import AdminList        from './pages/admin/managers/AdminList'
 import AdminRegister    from './pages/admin/managers/AdminRegister'
 import AdminDetail      from './pages/admin/managers/AdminDetail'
@@ -43,6 +44,7 @@ const publicRoutes = [
 const adminRoutes = [
     { path: 'users', element: <UserList /> },
     { path: 'users/create', element: <UserCreate /> },
+    { path: 'users/:id',    element: <UserDetail /> },
     { path: 'managers', element: <AdminList /> },
     { path: 'managers/register', element: <AdminRegister /> },
     { path: 'managers/:id', element: <AdminDetail /> },

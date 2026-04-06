@@ -20,7 +20,7 @@ const INITIAL_FILTER = {
     per_page     : 20,
 }
 
-function MemberList() {
+function UserList() {
     const navigate = useNavigate()
 
     const {
@@ -223,6 +223,12 @@ function MemberList() {
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-2">
                                             <button
+                                                onClick={() => navigate(`/admin/users/${item.id}`)}
+                                                className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                                            >
+                                                상세
+                                            </button>
+                                            <button
                                                 onClick={() => navigate(`/admin/member/${item.id}`)}
                                                 className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
                                             >
@@ -253,4 +259,4 @@ function MemberList() {
     )
 }
 
-export default MemberList
+export default UserList
