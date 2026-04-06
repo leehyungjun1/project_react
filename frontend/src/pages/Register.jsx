@@ -48,7 +48,7 @@ function Register() {
 
                 {/* 로고 */}
                 <h1 className="text-2xl font-bold text-orange-500 text-center mb-6">
-                    🥕 당근마켓
+                    홍련닷컴
                 </h1>
 
                 {/* 일반 에러 */}

@@ -59,6 +59,32 @@ $routes->group('api', function($routes) {
                 $routes->post('(:num)/cash',          'Api\Admin\Users\UserController::cashAdd/$1');
             });
 
+            $routes->group('products', function($routes) {
+                // 카테고리 관리
+                $routes->group('categories', function ($routes) {
+                    $routes->get('/',              'Api\Admin\Products\CategoryController::index');
+                    $routes->get('tree',           'Api\Admin\Products\CategoryController::tree');
+                    $routes->get('flat',           'Api\Admin\Products\CategoryController::flat');
+                    $routes->get('themes',         'Api\Admin\Products\CategoryController::themes');
+                    $routes->post('reorder',       'Api\Admin\Products\CategoryController::reorder');
+                    $routes->put('toggle/(:num)',  'Api\Admin\Products\CategoryController::toggle/$1');
+                    $routes->post('/',             'Api\Admin\Products\CategoryController::create');
+                    $routes->get('(:num)',         'Api\Admin\Products\CategoryController::show/$1');
+                    $routes->put('(:num)',         'Api\Admin\Products\CategoryController::update/$1');
+                    $routes->delete('(:num)',      'Api\Admin\Products\CategoryController::delete/$1');
+                });
+            });
+
+            //배송비 관리
+            $routes->group('delivery-groups', function($routes) {
+                $routes->get('/',         'Api\Admin\Products\DeliveryGroupController::index');
+                $routes->get('all',       'Api\Admin\Products\DeliveryGroupController::all');
+                $routes->post('/',        'Api\Admin\Products\DeliveryGroupController::create');
+                $routes->get('(:num)',    'Api\Admin\Products\DeliveryGroupController::show/$1');
+                $routes->put('(:num)',    'Api\Admin\Products\DeliveryGroupController::update/$1');
+                $routes->delete('(:num)', 'Api\Admin\Products\DeliveryGroupController::delete/$1');
+            });
+
             // 관리자 관리
             $routes->group('managers', function($routes) {
                 $routes->get('',           'Api\Admin\Managers\AdminController::index');

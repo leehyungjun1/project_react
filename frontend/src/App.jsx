@@ -20,6 +20,9 @@ import UserCreate       from './pages/admin/users/UserCreate'
 import UserDetail       from './pages/admin/users/UserDetail'
 import AdminList        from './pages/admin/managers/AdminList'
 import AdminRegister    from './pages/admin/managers/AdminRegister'
+import CategoryList     from './pages/admin/products/CategoryList'
+import DeliveryGroupList   from './pages/admin/products/DeliveryGroupList'
+import DeliveryGroupDetail from './pages/admin/products/DeliveryGroupDetail'
 import AdminDetail      from './pages/admin/managers/AdminDetail'
 import BannerList       from './pages/admin/design/BannerList'
 import BannerForm       from './pages/admin/design/BannerForm'
@@ -48,6 +51,10 @@ const adminRoutes = [
     { path: 'managers', element: <AdminList /> },
     { path: 'managers/register', element: <AdminRegister /> },
     { path: 'managers/:id', element: <AdminDetail /> },
+    { path: 'products/categories',        element: <CategoryList /> },
+    { path: 'products/delivery-groups',        element: <DeliveryGroupList /> },
+    { path: 'products/delivery-groups/create', element: <DeliveryGroupDetail /> },
+    { path: 'products/delivery-groups/:id',    element: <DeliveryGroupDetail /> },
     { path: 'design/banners', element: <BannerList /> },
     { path: 'design/banners/create', element: <BannerForm /> },
     { path: 'design/banners/:id', element: <BannerForm /> },

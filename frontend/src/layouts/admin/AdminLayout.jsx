@@ -36,6 +36,8 @@ const menus = [
     { label: '상품 관리',  path: '/admin/products',  icon: FaBox,        sub: [
             { label: '상품 리스트', path: '/admin/products' },
             { label: '상품 등록',   path: '/admin/products/create' },
+            { label: '카테고리 관리',  path: '/admin/products/categories' },
+            { label: '배송비 그룹',    path: '/admin/products/delivery-groups' },
         ]},
     { label: '게시판 관리', path: '/admin/boards',    icon: FaClipboard,  sub: [
             { label: '게시글 리스트', path: '/admin/boards' },
@@ -93,7 +95,7 @@ function AdminLayout() {
                             onClick={() => navigate('/admin/dashboard')}
                             className="text-lg font-bold text-orange-500 cursor-pointer"
                         >
-                            🥕 당근마켓 관리자
+                            홍련닷컴 관리자
                         </div>
                         {/* 관리자 정보 (로고 오른쪽) */}
                         <div className="flex items-center gap-3 text-sm text-gray-600 ml-4 pl-4 border-l border-gray-200">
@@ -160,7 +162,7 @@ function AdminLayout() {
 `}>
                             {/* 헤더 */}
                             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                                <span className="font-bold text-orange-500">🥕 당근마켓 관리자</span>
+                                <span className="font-bold text-orange-500">홍련닷컴 관리자</span>
                                 <button
                                     onClick={() => setMobileMenuOpen(false)}
                                     className="text-gray-400 hover:text-red-500"
