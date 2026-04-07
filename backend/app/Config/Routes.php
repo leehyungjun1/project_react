@@ -73,6 +73,13 @@ $routes->group('api', function($routes) {
                     $routes->put('(:num)',         'Api\Admin\Products\CategoryController::update/$1');
                     $routes->delete('(:num)',      'Api\Admin\Products\CategoryController::delete/$1');
                 });
+
+                // 상품
+                $routes->get('/',         'Api\Admin\Products\ProductController::index');
+                $routes->post('/',        'Api\Admin\Products\ProductController::create');
+                $routes->get('(:num)',    'Api\Admin\Products\ProductController::show/$1');
+                $routes->put('(:num)',    'Api\Admin\Products\ProductController::update/$1');
+                $routes->delete('(:num)', 'Api\Admin\Products\ProductController::delete/$1');
             });
 
             //배송비 관리

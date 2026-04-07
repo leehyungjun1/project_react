@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react'
+
 // 라벨 + 입력 한 행 컴포넌트
-export const Row = ({ label, required, children }) => (
-    <div className="flex flex-col sm:flex-row sm:items-start py-2.5 border-b border-gray-100 last:border-0">
+export const Row = ({ label, required, children, className = '' }) => (
+    <div className={`flex flex-col sm:flex-row sm:items-start py-2.5 border-b border-gray-100 last:border-0 ${className}`}>
         <div className="w-full sm:w-28 shrink-0 text-sm font-medium text-gray-600 py-1.5">
             {required && <span className="text-red-500 mr-1">*</span>}
             {label}
@@ -64,6 +66,53 @@ export const EmailInput = ({ idName = 'email_id', domainName = 'email_domain', f
         {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </>
 )
+
+export const PriceInput = ({
+                               name,
+                               value,
+                               onChange,
+                               readOnly = false,
+                               suffix = '원',
+                               placeholder = '0',
+                               className = '',
+                           }) => {
+    const [displayValue, setDisplayValue] = useState('')
+
+    const formatNumber = (num) => {
+        if (num === '' || num === null || num === undefined) return ''
+        return Number(String(num).replace(/[^0-9]/g, '')).toLocaleString()
+    }
+
+    useEffect(() => {
+        setDisplayValue(formatNumber(value))
+    }, [value])
+
+    const handleChange = (e) => {
+        const raw = e.target.value.replace(/[^0-9]/g, '')
+        setDisplayValue(raw ? Number(raw).toLocaleString() : '')
+        onChange({
+            target: {
+                name,
+                value: raw ? Number(raw) : 0,
+            }
+        })
+    }
+
+    return (
+        <div className="flex items-center gap-2">
+            <input
+                type="text"
+                name={name}
+                value={displayValue}
+                onChange={handleChange}
+                readOnly={readOnly}
+                placeholder={placeholder}
+                className={`flex-1 border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400 text-right ${readOnly ? 'bg-gray-50 cursor-not-allowed text-gray-400' : ''} ${className}`}
+            />
+            {suffix && <span className="text-sm text-gray-500 shrink-0">{suffix}</span>}
+        </div>
+    )
+}
 
 
 // 공통 input 스타일

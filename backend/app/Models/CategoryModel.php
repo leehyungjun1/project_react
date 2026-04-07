@@ -60,22 +60,28 @@ class CategoryModel extends Model
         $offset  = ($page - 1) * $perPage;
 
         $builder = $this->db->table('categories c')
-            ->select('c.*, p.name as parent_name, t1.name as pc_theme_name, t2.name as mobile_theme_name')
-            ->join('categories c2',     'c2.id = c.parent_id',      'left')
-            ->join('category_themes t1','t1.id = c.pc_theme_id',    'left')
-            ->join('category_themes t2','t2.id = c.mobile_theme_id','left')
-            ->join('categories p',      'p.id = c.parent_id',       'left')
+            ->select('c.*, p.name as parent_name')
+            ->join('categories p', 'p.id = c.parent_id', 'left')
             ->where('c.deleted_at IS NULL');
 
         if (!empty($params['keyword'])) {
             $builder->like('c.name', $params['keyword']);
         }
+
         if (isset($params['is_active']) && $params['is_active'] !== '') {
             $builder->where('c.is_active', $params['is_active']);
         }
+
+        // depth 필터
         if (isset($params['depth']) && $params['depth'] !== '') {
-            $builder->where('c.depth', $params['depth']);
+            $builder->where('c.depth', (int)$params['depth']);
         }
+
+        // parent_id 필터 ← 이게 핵심
+        if (isset($params['parent_id']) && $params['parent_id'] !== '') {
+            $builder->where('c.parent_id', $params['parent_id']);
+        }
+
         if (!empty($params['category_type'])) {
             $builder->where('c.category_type', $params['category_type']);
         }
