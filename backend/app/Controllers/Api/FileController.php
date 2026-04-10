@@ -11,8 +11,10 @@ class FileController extends ResourceController
 
     public function upload()
     {
-        $file     = $this->request->getFile('file');
-        $folder   = $this->request->getPost('folder') ?? 'common'; // 저장 폴더
+        $file       = $this->request->getFile('file');
+        $folder     = $this->request->getPost('folder')     ?? 'common';
+        $imageType  = $this->request->getPost('image_type') ?? null;
+        $autoResize = $this->request->getPost('auto_resize') ?? 0;
 
         if (!$file || !$file->isValid()) {
             return $this->respond([
@@ -21,27 +23,68 @@ class FileController extends ResourceController
             ], ResponseInterface::HTTP_BAD_REQUEST);
         }
 
-        $originalName = $file->getClientName();
-        $fileSize     = $file->getSize();
-        $fileType     = $file->getMimeType();
-        $savedName    = $file->getRandomName();
-
+        $fileType  = $file->getMimeType();
+        $savedName = $file->getRandomName();
         $uploadPath = FCPATH . 'uploads/' . $folder . '/';
+
         if (!is_dir($uploadPath)) {
             mkdir($uploadPath, 0755, true);
         }
 
         $file->move($uploadPath, $savedName);
-        $filePath = 'uploads/' . $folder . '/' . $savedName;
+        $originalPath = 'uploads/' . $folder . '/' . $savedName;
+
+        $result = [
+            'path'          => $originalPath,
+            'original_name' => $file->getClientName(),
+            'file_size'     => $file->getSize(),
+            'file_type'     => $fileType,
+        ];
+
+        // ── 자동 리사이즈 처리 ─────────────────────────────
+        if ($autoResize && str_starts_with($fileType, 'image/')) {
+            $sizeMap   = (new \App\Models\Product\ProductImageSizesModel())->getSizeMap();
+            $resized   = [];
+
+            foreach ($sizeMap as $type => $size) {
+                if ($type === 'original') continue; // 원본은 스킵
+
+                $width  = (int)$size['width'];
+                $height = (int)$size['height'];
+
+                // 둘 다 0이면 리사이즈 안 함
+                if ($width === 0 && $height === 0) continue;
+
+                // 타입별 파일명 생성
+                $resizedName = pathinfo($savedName, PATHINFO_FILENAME) . "_{$type}." . pathinfo($savedName, PATHINFO_EXTENSION);
+                $resizedPath = $uploadPath . $resizedName;
+
+                try {
+                    $image = \Config\Services::image()
+                        ->withFile($uploadPath . $savedName);
+
+                    $origW = $image->getWidth();
+                    $origH = $image->getHeight();
+
+                    // 0이면 비율에 맞게 계산
+                    if ($width === 0)  $width  = (int)round($origW * $height / $origH);
+                    if ($height === 0) $height = (int)round($origH * $width  / $origW);
+
+                    $image->resize($width, $height, true)
+                        ->save($resizedPath);
+
+                    $resized[$type] = 'uploads/' . $folder . '/' . $resizedName;
+                } catch (\Throwable $e) {
+                    log_message('error', "이미지 리사이즈 실패 [{$type}]: " . $e->getMessage());
+                }
+            }
+
+            $result['resized'] = $resized;
+        }
 
         return $this->respond([
             'status' => true,
-            'data'   => [
-                'path'          => $filePath,
-                'original_name' => $originalName,
-                'file_size'     => $fileSize,
-                'file_type'     => $fileType,
-            ],
+            'data'   => $result,
         ]);
     }
 

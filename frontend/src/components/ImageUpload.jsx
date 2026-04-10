@@ -13,6 +13,9 @@ function ImageUpload({
                          accept = 'image/*',
                          label  = '이미지 선택',
                          hint,            // 하단 안내 문구
+                         imageType   = null,
+                         autoResize  = false,
+                         onResized = null,
                      }) {
     const inputRef = useRef(null)
 
@@ -24,12 +27,26 @@ function ImageUpload({
             const formData = new FormData()
             formData.append('file', file)
             formData.append('folder', folder)
+            if (imageType)  formData.append('image_type',  imageType)
+            if (autoResize) formData.append('auto_resize', 1)
 
             const res = await api.post('/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             })
 
-            onChange(res.data.data.path)
+            console.log('업로드 응답:', res.data)
+
+            const data = res.data.data
+            if (data.resized && onResized) {
+                onResized({ ...data.resized, [imageType]: data.path })  // 한번에 세팅
+            } else {
+                onChange(data.path)
+            }
+
+            if (data.resized && onResized) {
+                console.log('onResized 호출:', data.resized)
+                onResized(data.resized)
+            }
         } catch (err) {
             showAlert('error', '오류', '이미지 업로드 실패')
         }

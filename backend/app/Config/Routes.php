@@ -80,6 +80,8 @@ $routes->group('api', function($routes) {
                 $routes->get('(:num)',    'Api\Admin\Products\ProductController::show/$1');
                 $routes->put('(:num)',    'Api\Admin\Products\ProductController::update/$1');
                 $routes->delete('(:num)', 'Api\Admin\Products\ProductController::delete/$1');
+                $routes->get ('image-sizes', 'Api\Admin\Products\ProductImageSizeController::index');
+                $routes->put ('image-sizes', 'Api\Admin\Products\ProductImageSizeController::updateAll');
             });
 
             //배송비 관리

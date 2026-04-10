@@ -36,6 +36,7 @@ const menus = [
     { label: '상품 관리',  path: '/admin/products',  icon: FaBox,        sub: [
             { label: '상품 리스트', path: '/admin/products' },
             { label: '상품 등록',   path: '/admin/products/create' },
+            { label: '이미지 사이즈 설정', path: '/admin/products/image-sizes' },
             { label: '카테고리 관리',  path: '/admin/products/categories' },
             { label: '배송비 그룹',    path: '/admin/products/delivery-groups' },
         ]},

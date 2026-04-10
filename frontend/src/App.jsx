@@ -22,6 +22,8 @@ import AdminList        from './pages/admin/managers/AdminList'
 import AdminRegister    from './pages/admin/managers/AdminRegister'
 import ProductList      from './pages/admin/products/ProductList'
 import ProductCreate    from './pages/admin/products/ProductCreate'
+import ProductForm      from '@/pages/admin/products/ProductForm'
+import ProductImageSizes from '@/pages/admin/products/ProductImageSizes'
 import CategoryList     from './pages/admin/products/CategoryList'
 import DeliveryGroupList   from './pages/admin/products/DeliveryGroupList'
 import DeliveryGroupDetail from './pages/admin/products/DeliveryGroupDetail'
@@ -54,12 +56,13 @@ const adminRoutes = [
     { path: 'managers/register', element: <AdminRegister /> },
     { path: 'managers/:id', element: <AdminDetail /> },
     { path: 'products/',        element: <ProductList /> },
-    { path: 'products/create',  element: <ProductCreate /> },
-    { path: 'products/:id',     element: <ProductCreate /> },
+    { path: 'products/create',  element: <ProductForm /> },
+    { path: 'products/:id',     element: <ProductForm /> },
     { path: 'products/categories',        element: <CategoryList /> },
     { path: 'products/delivery-groups',        element: <DeliveryGroupList /> },
     { path: 'products/delivery-groups/create', element: <DeliveryGroupDetail /> },
     { path: 'products/delivery-groups/:id',    element: <DeliveryGroupDetail /> },
+    { path: 'products/image-sizes',    element: <ProductImageSizes /> },
     { path: 'design/banners', element: <BannerList /> },
     { path: 'design/banners/create', element: <BannerForm /> },
     { path: 'design/banners/:id', element: <BannerForm /> },

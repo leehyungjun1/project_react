@@ -29,6 +29,9 @@ function ProductImageUpload({ form, onChange }) {
                     width="w-48"
                     height="h-48"
                     hint="JPG, PNG, WebP 권장"
+                    imageType="original"
+                    autoResize={form.img_auto_resize == 1}
+                    onResized={(resized) => onChange(resized)}
                 />
                 <label className="flex items-center gap-2 text-sm cursor-pointer mt-3 text-gray-600">
                     <input
@@ -55,6 +58,9 @@ function ProductImageUpload({ form, onChange }) {
                                 folder="products"
                                 label={label}
                                 height="h-24"
+                                imageType={key}
+                                autoResize={form.img_auto_resize == 1}
+                                onResized={(resized) => onChange(resized)}
                             />
                         </div>
                     ))}
